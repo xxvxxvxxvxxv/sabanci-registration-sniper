@@ -1,0 +1,21 @@
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const {JSDOM}=require('jsdom');
+const root=path.resolve(__dirname,'..','extension');
+const tick=()=>new Promise(r=>setTimeout(r,20));
+(async()=>{
+ const manifest=JSON.parse(fs.readFileSync(root+'/manifest.json'));
+ assert(manifest.permissions.includes('sidePanel'));assert(!manifest.action.default_popup);assert.equal(manifest.side_panel.default_path,'popup.html');
+ let behavior;vm.runInNewContext(fs.readFileSync(root+'/background.js','utf8'),{chrome:{sidePanel:{setPanelBehavior:async b=>{behavior=b;}}},console});
+ assert(behavior.openPanelOnActionClick);
+ const dom=new JSDOM(fs.readFileSync(root+'/popup.html','utf8'),{url:'https://extension.invalid/',runScripts:'outside-only'}),w=dom.window;
+ let activate,update,current={id:1,url:'http://127.0.0.1:8765/mock'};
+ w.chrome={storage:{session:{get:async()=>({connection:{port:8765,key:'x'.repeat(40)}}),set:async()=>{},remove:async()=>{}}},tabs:{query:async()=>[current],onActivated:{addListener:f=>activate=f},onUpdated:{addListener:f=>update=f}},scripting:{executeScript:async p=>p.files?[]:[{result:{ok:true,result:{mapping:[{id:'crn-1',crn:'10119'}],already:false}}}]}};
+ w.fetch=async()=>({ok:true,json:async()=>({ready:true,term:'202601',revision:1,crns:['10119'],warnings:[],generated_at:new Date().toISOString()})});
+ for(const file of ['autofill-core.js','popup.js'])vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),dom.getInternalVMContext());
+ await tick();w.document.getElementById('preview').click();await tick();assert(!w.document.getElementById('fill').disabled);
+ current={id:2,url:'https://example.org/'};activate({tabId:2});assert(w.document.getElementById('fill').disabled);assert.equal(w.document.getElementById('mapping').textContent,'');
+ w.document.getElementById('preview').click();await tick();assert(w.document.getElementById('status').textContent.includes('unsupported'));
+ current={id:1,url:'http://127.0.0.1:8765/mock'};activate({tabId:1});w.document.getElementById('preview').click();await tick();assert(!w.document.getElementById('fill').disabled);
+ update(1,{status:'loading'});assert(w.document.getElementById('fill').disabled);
+ dom.window.close();console.log('Side-panel integration: persistent manifest, action behavior, preview and tab/navigation invalidation passed.');
+})().catch(e=>{console.error(e);process.exit(1)});

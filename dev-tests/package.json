@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "node dom.cjs && node panel.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "30.0.1"
+  }
+}

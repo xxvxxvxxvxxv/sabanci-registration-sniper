@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Registration Sniper \u2014 Local Autofill Test",
+  "version": "0.6.0",
+  "description": "Preview, fill and verify CRNs on the bundled local mock form. Live SUIS adapter is not included.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*"
+  ],
+  "action": {
+    "default_title": "Registration Sniper"
+  },
+  "minimum_chrome_version": "116",
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
