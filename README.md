@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="#the-idea">The idea</a> ·
-  <a href="#in-action">Preview</a> ·
+  <a href="https://sabanci-registration-sniper.sitegap-tools.workers.dev">Live website</a> ·
   <a href="#how-it-works">Architecture</a> ·
   <a href="#adapting-the-project">Adaptation</a> ·
   <a href="#run-the-project">Setup</a>
@@ -26,12 +26,6 @@ A full course can become available at any moment. Without notifications, student
 The current implementation uses Sabancı's public course data. Its broader purpose is to demonstrate how availability monitoring, personal subscriptions and notifications can fit together—for another university, a workshop booking system, or another service with limited capacity.
 
 **This is a working example with institution-specific integrations, not a universal registration platform.** Adapting it requires a suitable data source and the destination system's own rules.
-
-## In action
-
-![Desktop timetable showing selected sections and overlapping meetings in separate red lanes](docs/images/timetable.png)
-
-*Actual screenshot from an earlier desktop build. The current timetable adds distinct course colors and yellow warning triangles for overlapping meetings.*
 
 ## What the project demonstrates
 
@@ -61,6 +55,10 @@ The web backend uses **Cloudflare Workers + D1** to cache public observations an
 
 Unknown or failed observations must remain unknown. An available seat is not a reservation or proof that a particular student is eligible.
 
+## Timing and reliability
+
+The default monitor interval is 120 seconds per CRN. Public observations are cached for 120 seconds, and upstream seat requests share a queue with a minimum 10-second gap after a completed request. Cache age, queue load, network latency and browser suspension can delay an alert beyond two minutes. Very brief openings can be missed. The observation timestamp is the freshness indicator; this is not an instant seat feed.
+
 ## Adapting the project
 
 1. **Connect the data source.** Replace the Sabancı adapters with the institution's supported integration. The current code is in `catalog.py`, `seats.py` and `web/src/parsers.mjs`.
@@ -84,8 +82,8 @@ The website requires no Python installation for visitors. Browser monitoring nee
 ## Implementation status
 
 - **Available:** local planning, public seat monitoring, notification channels and the persistent extension side panel.
-- **Packaged for deployment:** browser planner and shared Cloudflare backend; production Cloudflare verification remains pending.
-- **Prototype integration:** CRN autofill is tested on the bundled local mock form. Actual SUIS form support remains pending.
+- **Deployed on Cloudflare:** browser planner and shared public-data backend. Plan persistence, seat retrieval and sound were confirmed in a user smoke test. Real opening-event delivery and web Telegram delivery still require live verification.
+- **Prototype integration:** CRN autofill is tested on the bundled local mock form. Actual SUIS form support and hosted-website integration remain pending. The extension currently connects only to the local Python app.
 
 The project does not log into SUIS or automatically enroll students. Institution-wide deployment would require further integration, operational testing and review of the institution's registration requirements.
 
@@ -122,6 +120,6 @@ The Sabancı example uses [Sutable](https://sutable.vercel.app/202601), [public 
 
 The bundled Fall 2026–27 catalog is a dated snapshot. The included Spring 2026 registration PDF is historical and does not define Fall registration windows.
 
-Typography: Nimbus Sans Narrow Bold — [font license](assets/FONT-LICENSE.txt). Banner: original generated project artwork. Screenshot: actual desktop app capture.
+Typography: Nimbus Sans Narrow Bold — [font license](assets/FONT-LICENSE.txt). Banner: original generated project artwork.
 
 **Independent student project. Not affiliated with or endorsed by Sabancı University.**

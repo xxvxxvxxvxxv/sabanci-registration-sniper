@@ -16,6 +16,14 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  await assert.rejects(api('crns/import',{text:'10119 99999',term:p.term,revision:p.revision}),/Nothing was added/);assert.equal((await api('plan')).courses.length,9);
  vm.runInContext('plan=JSON.parse(localStorage.getItem("sniper-web-plan-v1"));render();',dom.getInternalVMContext());assert.equal(w.document.querySelectorAll('.tt-block').length,14);assert(new Set([...w.document.querySelectorAll('.tt-block')].map(n=>n.style.getPropertyValue('--course-bg'))).size>=5);
  const withClash=await api('crns/import',{text:'13646',term:p.term,revision:p.revision});assert(!(await api('draft',withClash)).ready);vm.runInContext('plan=JSON.parse(localStorage.getItem("sniper-web-plan-v1"));render();',dom.getInternalVMContext());assert.equal(w.document.querySelectorAll('.tt-warning').length,2);
+ // A pending feed observation must clear its banner after recovery, without erasing other notices.
+ vm.runInContext("seatState={crns:[],observations:{},events:[],combinations:[],running:true,reason:'Public feed is busy. Checks are queued; timestamps show freshness.'};renderSeats();",dom.getInternalVMContext());
+ assert(w.document.getElementById('monitor-message').textContent.includes('queued'));
+ assert(!w.document.getElementById('monitor-message').classList.contains('error'));
+ vm.runInContext("seatState.reason='';renderSeats();",dom.getInternalVMContext());
+ assert.equal(w.document.getElementById('monitor-message').textContent,'');
+ vm.runInContext("seatState.reason='Public feed is busy.';renderSeats();monitorMessage('Desktop notification failed.',true);seatState.reason='';renderSeats();",dom.getInternalVMContext());
+ assert.equal(w.document.getElementById('monitor-message').textContent,'Desktop notification failed.');
  const bad=JSON.parse(JSON.stringify(withClash));bad.courses[0].crns='oops';await assert.rejects(api('save',bad),/Invalid course/);
  await api('seats/config',{term:'202601',crns:['10119'],interval:120,follow_plan:false,backups:false});await api('seats/start',{});await intervals[0]();let s=await api('seats');assert.equal(s.events.length,0);assert.equal(s.observations['10119'].available,0);
  const now=w.Date.now();w.Date.now=()=>now+121000;seatCount=1;await intervals[0]();s=await api('seats');assert.equal(s.events.length,1);assert.equal(s.events[0].kind,'opened');await api('seats/stop',{});assert.equal((await api('seats')).running,false);

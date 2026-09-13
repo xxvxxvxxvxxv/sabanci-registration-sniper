@@ -1,5 +1,5 @@
 'use strict';
-let alarmUntil=0,seatRevision=0,seatState=null,seatBusy=false,watchDirty=false,seatInitial=null,soundEnabled=false,desktopEnabled=false,audioCtx=null;
+let displayedMonitorReason='',alarmUntil=0,seatRevision=0,seatState=null,seatBusy=false,watchDirty=false,seatInitial=null,soundEnabled=false,desktopEnabled=false,audioCtx=null;
 const seatTime=value=>value?new Date(value).toLocaleString('en-GB',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—';
 function seatLabel(crn){
  const c=catalogData?.term===seatState?.term?catalogData.courses.find(c=>c.offerings.some(o=>o.crn===crn)):null;
@@ -24,7 +24,8 @@ function renderSeats(sync=false){
  renderCombinations();
  $('seat-event-count').textContent=s.events.length||'';
  $('seat-events').innerHTML=[...s.events].reverse().slice(0,30).map(e=>`<div class="seat-event"><time>${seatTime(e.at)}</time><span>${e.kind==='opened'?`${esc(seatLabel(e.crn))} · ${e.remaining} seat(s) observed`:`Monitoring stopped · ${esc(e.crn)}`}</span>${e.kind==='opened'?`<button class="review-choice" data-choice="${esc(e.crn)}">Review section</button>`:''}</div>`).join('')||'<p>No alerts yet.</p>';
- if(s.reason)monitorMessage(s.reason,true);
+ if(s.reason){monitorMessage(s.reason,!s.reason.startsWith('Public feed is busy.'));displayedMonitorReason=s.reason;}
+ else if(displayedMonitorReason){if($('monitor-message').textContent===displayedMonitorReason)monitorMessage('');displayedMonitorReason='';}
 }
 async function alarm(){
  if(!soundEnabled||!audioCtx)return;
