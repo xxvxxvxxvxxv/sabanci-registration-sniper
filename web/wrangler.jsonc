@@ -15,7 +15,7 @@
     {
       "binding": "DB",
       "database_name": "sniper-public-feed",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "18cf1076-1ea7-4834-aad3-91d13a1571ba",
       "migrations_dir": "migrations"
     }
   ],
