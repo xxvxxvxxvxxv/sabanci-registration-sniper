@@ -12,7 +12,7 @@ FILES=['app.py','catalog.py','choices.py','seats.py','phone.py','index.html','st
        'test_app.py','test_catalog.py','test_upgrade.py','test_seats.py','test_choices.py','test_import.py',
        'assets/FONT-LICENSE.txt','assets/heading.otf','assets/reticle.svg','data/catalog.json',
        'data/spring-registration-days.pdf','data/spring-rules.json','dev-tests/dom.cjs','dev-tests/panel.cjs',
-       'dev-tests/package.json','scripts/build_release.py']
+       'dev-tests/package.json','scripts/build_release.py','docs/LOCAL-APP.md','docs/DEPLOYMENT.md','web/README.md']
 EXTENSION=['manifest.json','background.js','popup.html','popup.css','popup.js','autofill-core.js','mock-adapter.js']
 
 def build():
@@ -24,7 +24,10 @@ def build():
     with ZipFile(target,'w',ZIP_DEFLATED) as z:
         prefix=f'registration-sniper-v{VERSION}/'
         for name in FILES+[f'extension/{n}' for n in EXTENSION]+['extension/test-autofill.cjs']:
-            z.write(ROOT/name,prefix+name)
+            if name == 'README.md':
+                z.writestr(prefix+name,(ROOT/'docs/LOCAL-APP.md').read_text().replace('src="../assets/', 'src="assets/'))
+            else:
+                z.write(ROOT/name,prefix+name)
         z.writestr(prefix+'extension-package.zip',extension.getvalue())
     with ZipFile(target) as z:
         assert z.testzip() is None

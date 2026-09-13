@@ -1,0 +1,25 @@
+const vm=require('node:vm');const {JSDOM}=require(process.env.JSDOM_PATH||'jsdom');const fs=require('fs'),assert=require('node:assert/strict');
+const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFileSync('public/data/catalog.json'));const source=n=>fs.readFileSync('public/'+n,'utf8');
+(async()=>{
+ const errors=[],requests=[],intervals=[],notifications=[],registered=[];let seatCount=0;const dom=new JSDOM(html,{url:'https://sniper.test/',runScripts:'outside-only',pretendToBeVisual:true});const w=dom.window;
+ w.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};w.HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');};
+ w.confirm=()=>true;w.matchMedia=()=>({matches:false});w.AbortSignal.timeout=()=>undefined;
+ w.setInterval=f=>{intervals.push(f);return intervals.length;};
+ const held=new Set();w.navigator.locks={request:async(name,options,cb)=>{if(typeof options==='function'){cb=options;options={};}if(held.has(name)&&options.ifAvailable)return cb(null);held.add(name);try{return await cb({name});}finally{held.delete(name);}}};
+ w.document.modelContext={registerTool:t=>registered.push(t)};
+ w.fetch=async(url,opts={})=>{requests.push([url,opts]);let data;if(url.startsWith('/api/catalog'))data=cat;else if(url.startsWith('/api/seat'))data={capacity:20,actual:20-seatCount,remaining:seatCount,available:seatCount,checked_at:new Date(w.Date.now()).toISOString()};else throw Error('Unexpected network destination '+url);return {ok:true,json:async()=>JSON.parse(JSON.stringify(data))};};
+ for(const f of ['core.js','web-api.js','ui.js','catalog-ui.js','seats-ui.js','phone-ui.js'])vm.runInContext(source(f),dom.getInternalVMContext());
+ await new Promise(r=>setTimeout(r,250));const api=w.SniperWeb.api,C=w.SniperCore;let p=await api('plan');assert.equal(p.courses.length,0);
+ const text='10119 10123 13511 10350 10352 10355 12131 10218 10226';const preview=await api('crns/preview',{text,term:p.term,revision:p.revision});assert.equal(preview.rows.length,9);assert.equal(preview.errors.length,0);assert.equal((await api('plan')).courses.length,0);
+ p=await api('crns/import',{text,term:p.term,revision:p.revision,catalog_stamp:preview.catalog_stamp});assert.equal(p.courses.length,9);assert.equal((await api('draft',p)).crns.length,9);
+ await assert.rejects(api('save',{...p,revision:0}),/another tab/);
+ await assert.rejects(api('crns/import',{text:'10119 99999',term:p.term,revision:p.revision}),/Nothing was added/);assert.equal((await api('plan')).courses.length,9);
+ vm.runInContext('plan=JSON.parse(localStorage.getItem("sniper-web-plan-v1"));render();',dom.getInternalVMContext());assert.equal(w.document.querySelectorAll('.tt-block').length,14);assert(new Set([...w.document.querySelectorAll('.tt-block')].map(n=>n.style.getPropertyValue('--course-bg'))).size>=5);
+ const withClash=await api('crns/import',{text:'13646',term:p.term,revision:p.revision});assert(!(await api('draft',withClash)).ready);vm.runInContext('plan=JSON.parse(localStorage.getItem("sniper-web-plan-v1"));render();',dom.getInternalVMContext());assert.equal(w.document.querySelectorAll('.tt-warning').length,2);
+ const bad=JSON.parse(JSON.stringify(withClash));bad.courses[0].crns='oops';await assert.rejects(api('save',bad),/Invalid course/);
+ await api('seats/config',{term:'202601',crns:['10119'],interval:120,follow_plan:false,backups:false});await api('seats/start',{});await intervals[0]();let s=await api('seats');assert.equal(s.events.length,0);assert.equal(s.observations['10119'].available,0);
+ const now=w.Date.now();w.Date.now=()=>now+121000;seatCount=1;await intervals[0]();s=await api('seats');assert.equal(s.events.length,1);assert.equal(s.events[0].kind,'opened');await api('seats/stop',{});assert.equal((await api('seats')).running,false);
+ assert(requests.every(([u,o])=>!o.body),'No private plans leave the browser.');assert(requests.every(([u])=>u.startsWith('/api/catalog')||u.startsWith('/api/seat')));
+ assert.equal(JSON.parse(w.localStorage.getItem('sniper-web-plan-v1')).courses.length,10);
+ dom.window.close();console.log('PASS: plan storage, atomic import, conflict geometry/colors, preparation, revision protection, monitor transitions, private network boundary.');
+})().catch(e=>{console.error(e);process.exit(1);});

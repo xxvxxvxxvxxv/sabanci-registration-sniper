@@ -1,0 +1,26 @@
+{
+  "name": "sabanci-registration-sniper-web",
+  "version": "0.7.0-beta.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "check": "wrangler deploy --dry-run --outdir dist",
+    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "test": "node tests/web.cjs && python3 tests/queue.py"
+  },
+  "devDependencies": {
+    "wrangler": "4.92.0",
+    "jsdom": "26.1.0"
+  },
+  "cloudflare": {
+    "bindings": {
+      "DB": {
+        "description": "Shared public catalog and seat cache only. Personal plans and Telegram tokens stay in the browser."
+      }
+    }
+  }
+}
