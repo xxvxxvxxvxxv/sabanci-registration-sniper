@@ -1,0 +1,14 @@
+{
+  "description": "Registration Sniper \u2014 course availability alerts, timetable planning and CRN preparation. A local-first reference project built around Sabanc\u0131 University.",
+  "homepage": "https://sabanci-registration-sniper.sitegap-tools.workers.dev/",
+  "topics": [
+    "course-registration",
+    "seat-alerts",
+    "timetable",
+    "chrome-extension",
+    "cloudflare-workers",
+    "education",
+    "local-first",
+    "sabanci-university"
+  ]
+}

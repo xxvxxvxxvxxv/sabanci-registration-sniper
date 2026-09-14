@@ -85,7 +85,7 @@ The website requires no Python installation for visitors. Browser monitoring nee
 
 - **Available:** local planning, public seat monitoring, notification channels and the persistent extension side panel.
 - **Deployed on Cloudflare:** browser planner and shared public-data backend. Plan persistence, seat retrieval and sound were confirmed in a user smoke test. Real opening-event delivery and web Telegram delivery still require live verification.
-- **Autofill integration:** Extension 0.8 transfers prepared CRNs from the hosted website or local Python app and can fill recognized SUIS registration inputs after preview. It verifies the term and field layout, protects existing values and reads back the result. Automated tests use sample forms and simulated Chrome APIs; compatibility with the actual live SUIS form remains unverified. Registration submission is manual. [Autofill setup](docs/AUTOFILL.md)
+- **Autofill integration:** Extension 0.9 transfers prepared CRNs from the hosted website or local Python app and can fill recognized SUIS registration inputs after preview. It verifies the term and field layout, protects existing values and reads back the result. Automated tests use sample forms and simulated Chrome APIs; compatibility with the actual live SUIS form remains unverified. Registration submission is manual. [Autofill setup](docs/AUTOFILL.md)
 
 The project does not log into SUIS or automatically enroll students. Institution-wide deployment would require further integration, operational testing and review of the institution's registration requirements.
 
@@ -125,3 +125,9 @@ The bundled Fall 2026–27 catalog is a dated snapshot. The included Spring 2026
 Typography: Nimbus Sans Narrow Bold — [font license](assets/FONT-LICENSE.txt). Banner: original generated project artwork.
 
 **Independent student project. Not affiliated with or endorsed by Sabancı University.**
+
+## Registration Sniper 0.9
+
+The hosted app adds a first-visit homepage and an illustrated extension guide. Optional **[Aimbot prepare mode](docs/AIMBOT.md)** reacts to a new opening, navigates recognized Add/Drop steps and fills the exact CRN plan once. Login and final submission remain manual. Live trial compatibility is pending verification.
+
+[Release handoff](docs/RELEASE-0.9.md) · [Privacy](https://sabanci-registration-sniper.sitegap-tools.workers.dev/privacy.html)

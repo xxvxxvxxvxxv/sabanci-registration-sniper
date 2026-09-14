@@ -1,4 +1,4 @@
-# CRN autofill — extension 0.8.1
+# CRN autofill — extension 0.9.0
 
 ## Install and use
 
@@ -25,3 +25,5 @@ Nineteen sample-form checks cover normal fill, read-back, no submission/events, 
 These are automated tests with synthetic forms and simulated Chrome APIs. **Actual live SUIS form compatibility and installed-Chrome operation remain to be verified.** If recognition fails, report the exact extension error and the CRN-field markup only, excluding credentials, cookies and other personal fields.
 
 The hosted website’s **Extension** page provides three original workflow illustrations and a download. The **Local Python app only** settings in the side panel are optional; the key field is only used with `127.0.0.1`.
+
+Optional [Aimbot prepare mode](AIMBOT.md) automates recognized navigation and filling after explicit arming. Final registration submission stays manual.

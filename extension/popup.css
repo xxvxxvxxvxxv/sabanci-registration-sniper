@@ -3,3 +3,5 @@
 body{width:auto;min-width:260px;max-width:none;margin:0;padding:22px;box-sizing:border-box}html{min-height:100%}footer{margin-top:26px}
 
 .connection-help{font-size:12px;line-height:1.5;color:#bcb7c9}
+
+.aimbot{margin-top:24px;padding-top:18px;border-top:1px solid #38333e}.aimbot h2{font-size:17px}.aimbot h2 small{font:9px monospace;color:#c5b488}.aimbot small{font-size:10px;color:#aca6b6}.aimbot .toggle{display:flex;align-items:center;gap:9px;font-size:12px}.aimbot input{width:16px}.aimbot p{font-size:12px;line-height:1.5}
