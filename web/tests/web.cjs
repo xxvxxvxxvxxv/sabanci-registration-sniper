@@ -16,6 +16,24 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  await assert.rejects(api('crns/import',{text:'10119 99999',term:p.term,revision:p.revision}),/Nothing was added/);assert.equal((await api('plan')).courses.length,9);
  vm.runInContext('plan=JSON.parse(localStorage.getItem("sniper-web-plan-v1"));render();',dom.getInternalVMContext());assert.equal(w.document.querySelectorAll('.tt-block').length,14);assert(new Set([...w.document.querySelectorAll('.tt-block')].map(n=>n.style.getPropertyValue('--course-bg'))).size>=5);
  const withClash=await api('crns/import',{text:'13646',term:p.term,revision:p.revision});assert(!(await api('draft',withClash)).ready);vm.runInContext('plan=JSON.parse(localStorage.getItem("sniper-web-plan-v1"));render();',dom.getInternalVMContext());assert.equal(w.document.querySelectorAll('.tt-warning').length,2);
+ // Fit mode uses the same minute scale for grid cells and meetings, without losing overlaps.
+ const scroll=w.document.querySelector('.timetable-scroll');
+ scroll.getBoundingClientRect=()=>({top:300});
+ Object.defineProperty(w,'innerHeight',{value:900,writable:true,configurable:true});
+ vm.runInContext('renderTimetable();',dom.getInternalVMContext());
+ const day=w.document.querySelector('.tt-day');
+ assert(parseFloat(day.style.height)+42<=parseFloat(scroll.style.height)+0.01);
+ const block=w.document.querySelector('.tt-block');
+ const lessonHeight=parseFloat(scroll.style.getPropertyValue('--lesson-height'));
+ assert(Math.abs(parseFloat(block.style.height)/lessonHeight-Math.round(parseFloat(block.style.height)/lessonHeight*10)/10)<0.001);
+ const fitHeight=parseFloat(day.style.height);
+ const sizing=w.document.getElementById('timetable-scale');sizing.value='comfortable';sizing.onchange();
+ assert(parseFloat(w.document.querySelector('.tt-day').style.height)>fitHeight);
+ assert.equal(w.localStorage.getItem('sniper-timetable-scale'),'comfortable');
+ sizing.value='fit';sizing.onchange();w.innerHeight=700;w.dispatchEvent(new w.Event('resize'));
+ assert(parseFloat(w.document.querySelector('.tt-day').style.height)<fitHeight);
+ assert.equal(w.document.querySelectorAll('.tt-warning').length,2);
+
  // A pending feed observation must clear its banner after recovery, without erasing other notices.
  vm.runInContext("seatState={crns:[],observations:{},events:[],combinations:[],running:true,reason:'Public feed is busy. Checks are queued; timestamps show freshness.'};renderSeats();",dom.getInternalVMContext());
  assert(w.document.getElementById('monitor-message').textContent.includes('queued'));

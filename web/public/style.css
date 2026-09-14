@@ -32,3 +32,20 @@ main{padding-top:20px}.page-heading{margin-bottom:10px}h1{font-size:32px}.catalo
 .tt-block-title{display:flex;align-items:center;gap:5px;width:100%;min-width:0;line-height:1.15}
 .tt-block-title>span{min-width:0;overflow-wrap:anywhere}
 .tt-warning{display:block;flex:0 0 16px;width:16px;height:16px}
+
+/* Fit the day using one shared time-to-pixel scale. */
+.timetable-size{display:flex;align-items:center;gap:8px;font-size:11px;margin-left:auto;white-space:nowrap}
+.timetable-size select{width:auto;padding:7px 9px}
+.timetable-scroll{min-height:0}
+.tt-times span{height:var(--hour-height);box-sizing:border-box}
+.tt-times small{position:absolute;top:calc(var(--lesson-height) - 10px);margin:0;font-size:8px}
+.tt-compact .tt-block{padding:3px 5px;gap:1px}
+.tt-compact .tt-block>span{display:none}
+.tt-compact .tt-block small{white-space:nowrap}
+.tt-compact .tt-block small br{display:none}
+.tt-compact .tt-block small{font-size:8px}
+.tt-compact .tt-block b{font-size:11px;white-space:nowrap}
+.tt-compact .tt-block-title>span{overflow:hidden;text-overflow:ellipsis}
+.tt-compact .tt-times small{display:none}
+
+.tt-time,.tt-room{display:block}.tt-compact .tt-room{display:none}

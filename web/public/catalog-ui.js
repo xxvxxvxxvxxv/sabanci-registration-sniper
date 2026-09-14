@@ -1,5 +1,9 @@
 'use strict';
 let catalogData=null, expandedCourse='', solverCandidate=null;
+let timetableScale='fit';try{if(localStorage.getItem('sniper-timetable-scale')==='comfortable')timetableScale='comfortable';}catch{}
+$('timetable-scale').value=timetableScale;
+$('timetable-scale').onchange=()=>{timetableScale=$('timetable-scale').value;try{localStorage.setItem('sniper-timetable-scale',timetableScale);}catch{}renderTimetable();};
+window.addEventListener('resize',()=>{if(catalogData&&!$('view-catalog').hidden)renderTimetable();});
 const typeName=t=>({'':'Main section',R:'Recitation',L:'Lab',D:'Discussion'}[t]||'Component '+t);
 const hm=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
 const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -46,7 +50,12 @@ function renderTimetable(){
  for(let i=0;i<slots.length;i++)for(let j=i+1;j<slots.length;j++)if(slots[i].row!==slots[j].row&&overlaps(slots[i],slots[j]))clashes.push([slots[i],slots[j]]);
  const conflictSlots=new Set(clashes.flat()),colors=timetableColors(plan.courses);
  $('schedule-summary').textContent=`${active.length} sections · ${new Set(active.flatMap(r=>r.crns.split(/\s+/).filter(Boolean))).size} CRNs · ${new Set(clashes.map(p=>p.map(s=>s.row.course).sort().join(' / '))).size} conflicting pairs`;
- const dayCount=slots.some(s=>s.day>4)?7:5,start=Math.min(520,...slots.map(s=>Math.floor((s.start-40)/60)*60+40)),end=Math.max(1240,...slots.map(s=>Math.ceil((s.end-40)/60)*60+40)),scale=1.4;
+ const dayCount=slots.some(s=>s.day>4)?7:5,start=Math.min(520,...slots.map(s=>Math.floor((s.start-40)/60)*60+40)),end=slots.length?Math.max(1060,...slots.map(s=>Math.ceil((s.end-40)/60)*60+40)):1180;
+ const scroll=document.querySelector('.timetable-scroll'),top=scroll.getBoundingClientRect().top;
+ const height=Math.max(280,window.innerHeight-(top>0?top:285)-24);
+ scroll.style.height=height+'px';scroll.style.maxHeight=height+'px';
+ const scale=timetableScale==='fit'?(height-42)/(end-start):1.4;
+ scroll.classList.toggle('tt-compact',scale<1.1);scroll.style.setProperty('--hour-height',60*scale+'px');scroll.style.setProperty('--lesson-height',50*scale+'px');
  const grid=$('timetable');grid.replaceChildren();grid.style.gridTemplateColumns=`58px repeat(${dayCount},minmax(100px,1fr))`;
  const corner=document.createElement('div');corner.className='tt-head';grid.append(corner);
  for(let day=0;day<dayCount;day++){const h=document.createElement('div');h.className='tt-head';h.textContent=dayNames[day];grid.append(h);}
@@ -60,7 +69,7 @@ function renderTimetable(){
   for(const cluster of clusters){const lanes=[];for(const s of cluster){let lane=lanes.findIndex(e=>e<=s.start);if(lane<0)lane=lanes.length;lanes[lane]=s.end;s.lane=lane;}
    for(const s of cluster){const conflict=conflictSlots.has(s),block=document.createElement('button');block.className='tt-block '+(conflict?'tt-conflict':'');const [bg,accent]=colors.get(colorKey(s.row));block.style.setProperty('--course-bg',bg);block.style.setProperty('--course-accent',accent);block.dataset.course=colorKey(s.row);block.style.top=(s.start-start)*scale+'px';block.style.height=(s.end-s.start)*scale+'px';block.style.width=`calc(${100/lanes.length}% - 4px)`;block.style.left=`calc(${s.lane*100/lanes.length}% + 2px)`;
     const offering=catalogData.courses.flatMap(c=>c.offerings).find(o=>o.crn===s.row.crns);const place=offering?.meetings.find(m=>m.day===s.day&&m.start===s.start)?.place||'';
-    block.innerHTML=`<b class="tt-block-title">${conflict?conflictIcon:''}<span>${esc(s.row.course)}</span></b><span>${esc(s.row.section)} · ${esc(s.row.crns)}</span><small>${hm(s.start)}–${hm(s.end)}<br>${esc(place)}</small>`;block.title=`${conflict?'Time conflict · ':''}${dayNames[s.day]} · ${s.row.course} ${s.row.section}\n${s.row.crns}\n${hm(s.start)}–${hm(s.end)} ${place}`;block.setAttribute('aria-label',block.title);block.onclick=()=>{expandedCourse=s.row.catalog_base||'';if(expandedCourse){$('catalog-search').value=expandedCourse;renderCatalog();}else openCourse(plan.courses.indexOf(s.row));};col.append(block);
+    block.innerHTML=`<b class="tt-block-title">${conflict?conflictIcon:''}<span>${esc(s.row.course)}</span></b><span>${esc(s.row.section)} · ${esc(s.row.crns)}</span><small><span class="tt-time">${hm(s.start)}–${hm(s.end)}</span><span class="tt-room">${esc(place)}</span></small>`;block.title=`${conflict?'Time conflict · ':''}${dayNames[s.day]} · ${s.row.course} ${s.row.section}\n${s.row.crns}\n${hm(s.start)}–${hm(s.end)} ${place}`;block.setAttribute('aria-label',block.title);block.onclick=()=>{expandedCourse=s.row.catalog_base||'';if(expandedCourse){$('catalog-search').value=expandedCourse;renderCatalog();}else openCourse(plan.courses.indexOf(s.row));};col.append(block);
    }
   }grid.append(col);
  }

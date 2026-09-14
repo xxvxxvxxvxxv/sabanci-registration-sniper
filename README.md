@@ -75,7 +75,7 @@ The same pattern can be explored for seminar seats, laboratory sessions, appoint
 | :--- | :--- |
 | Local Python app | Run `python3 app.py`, then open `http://127.0.0.1:8765`. [Local guide](docs/LOCAL-APP.md) |
 | Hosted website and public-data backend | Deploy `web/` to Cloudflare Workers + D1. [Deployment guide](docs/DEPLOYMENT.md) |
-| Chrome side panel | Load `extension/` through Chrome's extension developer settings. [Setup and limitations](docs/LOCAL-APP.md) |
+| Chrome side panel | Load `extension/` through Chrome's extension developer settings. [Setup and limitations](docs/EXTENSION-AND-VIEW.md) |
 
 The website requires no Python installation for visitors. Browser monitoring needs an open tab and an awake device; local monitoring needs the Python process to remain running. Continuous server-side personal subscriptions are not implemented.
 
@@ -83,7 +83,7 @@ The website requires no Python installation for visitors. Browser monitoring nee
 
 - **Available:** local planning, public seat monitoring, notification channels and the persistent extension side panel.
 - **Deployed on Cloudflare:** browser planner and shared public-data backend. Plan persistence, seat retrieval and sound were confirmed in a user smoke test. Real opening-event delivery and web Telegram delivery still require live verification.
-- **Prototype integration:** CRN autofill is tested on the bundled local mock form. Actual SUIS form support and hosted-website integration remain pending. The extension currently connects only to the local Python app.
+- **Prototype integration:** Extension 0.7 transfers prepared CRNs from the hosted website or local Python app into its side panel. Website transfer and current-plan copying pass automated tests with simulated Chrome APIs; an installed-Chrome check remains pending. Autofill is tested only on the bundled local mock form. A live SUIS form adapter is not implemented.
 
 The project does not log into SUIS or automatically enroll students. Institution-wide deployment would require further integration, operational testing and review of the institution's registration requirements.
 
