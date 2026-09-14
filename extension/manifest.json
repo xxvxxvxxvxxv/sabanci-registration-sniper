@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Registration Sniper \u2014 CRN Side Panel",
   "version": "0.9.0",
-  "description": "Prepare course CRNs in a side panel, preview and fill recognized SUIS fields, or prepare once after a seat opening. Manual submission.",
+  "description": "Prepare CRNs in a side panel and fill recognized SUIS fields after preview or a seat alert. Submit registration manually.",
   "permissions": [
     "activeTab",
     "scripting",

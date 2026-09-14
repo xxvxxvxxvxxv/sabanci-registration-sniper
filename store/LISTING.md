@@ -4,7 +4,7 @@
 
 Name: Registration Sniper — CRN Side Panel
 
-Short description: Prepare course CRNs in a side panel, preview and fill recognized SUIS fields, or prepare once after a seat opening. Manual submission.
+Short description: Prepare CRNs in a side panel and fill recognized SUIS fields after preview or a seat alert. Submit registration manually.
 
 Suggested category: Productivity / education-related tooling (select an available category in the dashboard).
 
