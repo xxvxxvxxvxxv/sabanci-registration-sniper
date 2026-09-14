@@ -95,3 +95,5 @@ body:has(#view-home:not([hidden])) .page-heading{display:none}
 
 /* Preserve the established Registration Sniper identity. */
 .brand span{display:block;font-size:13px;letter-spacing:.8px}.brand b{display:inline;font-size:29px;letter-spacing:.8px}.brand img{width:43px;height:43px}#boot-screen>b{font-size:19px;letter-spacing:2px;text-align:center}.welcome-hero>img{opacity:.9}
+
+.welcome-credit{padding:12px 0 24px;text-align:center;font-size:12px;letter-spacing:.04em;color:var(--muted)}
