@@ -54,6 +54,29 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  assert(!w.document.getElementById('view-catalog').hidden);
  assert.equal(w.document.querySelectorAll('.tt-warning').length,2);
 
+ // Opt-in conflicts persist in the plan and reach the existing extension bridge.
+ const toggle=w.document.getElementById('allow-time-conflicts');assert.equal(toggle.checked,false);
+ const beforeOverride=await api('plan');
+ toggle.checked=true;await toggle.onchange();
+ const allowed=await api('plan');assert.equal(allowed.allow_time_conflicts,true);assert.equal(allowed.revision,beforeOverride.revision+1);
+ assert.deepEqual(JSON.parse(JSON.stringify(allowed.courses)),JSON.parse(JSON.stringify(beforeOverride.courses)));
+ const draft=await api('draft',allowed);assert(draft.ready);assert.equal(draft.crns.length,10);assert(draft.warnings.some(x=>x.startsWith('Time conflict:')));
+ assert((await api('prepare',allowed)).ready);
+ await vm.runInContext('runCheck()',dom.getInternalVMContext());
+ assert(!w.document.getElementById('copy').disabled);assert(w.document.getElementById('prep-details').textContent.includes('allowed for this plan'));
+ assert.equal(w.document.querySelectorAll('.tt-warning').length,2);
+ // Use the released extension's actual reader with a simulated Chrome injection.
+ dom.reconfigure({url:'https://sabanci-registration-sniper.sitegap-tools.workers.dev/'});
+ const bridge={chrome:{tabs:{get:async()=>({url:w.location.href})},scripting:{executeScript:async({func,args})=>[{result:await vm.runInContext('('+func.toString()+')('+JSON.stringify(args[0])+')',dom.getInternalVMContext())}]}}};
+ vm.createContext(bridge);bridge.URL=URL;vm.runInContext(fs.readFileSync('../extension/web-source.js','utf8'),bridge);
+ const packet=await bridge.SniperWebSource.read(1);assert(packet.ready);assert.equal(packet.crns.length,10);assert.equal(packet.revision,allowed.revision);assert(packet.warnings.some(x=>x.startsWith('Time conflict:')));
+ const wrongTerm={...allowed,term:'202602'};assert(!(await api('draft',wrongTerm)).ready);
+ const duplicated=JSON.parse(JSON.stringify(allowed));duplicated.courses.push({...duplicated.courses[0]});assert(!(await api('draft',duplicated)).ready);
+ await assert.rejects(api('draft',{...allowed,allow_time_conflicts:'true'}),/Invalid time conflict/);
+ vm.runInContext('plan=JSON.parse(localStorage.getItem("sniper-web-plan-v1"));render();',dom.getInternalVMContext());assert(toggle.checked);
+ toggle.checked=false;await toggle.onchange();await vm.runInContext('runCheck()',dom.getInternalVMContext());
+ assert(!(await api('draft',await api('plan'))).ready);assert(w.document.getElementById('copy').disabled);assert(!(await bridge.SniperWebSource.read(1)).ready);
+
  // A pending feed observation must clear its banner after recovery, without erasing other notices.
  vm.runInContext("seatState={crns:[],observations:{},events:[],combinations:[],running:true,reason:'Public feed is busy. Checks are queued; timestamps show freshness.'};renderSeats();",dom.getInternalVMContext());
  assert(w.document.getElementById('monitor-message').textContent.includes('queued'));

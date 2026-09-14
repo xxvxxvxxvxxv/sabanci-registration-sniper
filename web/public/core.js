@@ -6,6 +6,7 @@ window.SniperCore=(()=>{
  const active=r=>r.selected||r.status==='registered';
  function validate(p){
   if(!p||!/^\d{6}$/.test(p.term)||!Array.isArray(p.courses)||p.courses.length>80||!Number.isSafeInteger(p.revision)||p.revision<0)throw Error('Invalid plan. Expected a term and at most 80 sections.');
+  if(p.allow_time_conflicts!==undefined&&typeof p.allow_time_conflicts!=='boolean')throw Error('Invalid time conflict preference.');
   for(const r of p.courses){
    if(!r||typeof r.course!=='string'||!r.course.trim()||typeof r.crns!=='string'||ids(r).some(x=>!/^\d{5}$/.test(x)))throw Error('Invalid course or CRN.');
    if(!['planned','full','registered','rejected','uncertain'].includes(r.status)||typeof r.selected!=='boolean'||!Number.isInteger(r.priority)||r.priority<1||r.priority>99)throw Error('Invalid section status or priority.');
@@ -22,7 +23,7 @@ window.SniperCore=(()=>{
   validate(p);const errors=[],warnings=[],out=[],seen=new Set(),used=new Set(),rows=p.courses.filter(active),selected=rows.filter(r=>r.selected&&r.status!=='registered').sort((a,b)=>a.priority-b.priority);
   if(cat.term!==p.term)errors.push('Catalog term differs from this plan.');
   for(const r of rows){const k=key(r.course);if(used.has(k))errors.push('Several sections selected for '+r.course);used.add(k);if(!slots(r).length||slots(r).length!==String(r.meetings||'').split(';').filter(s=>s.trim()).length)warnings.push(r.course+': meeting times are incomplete.');}
-  for(let i=0;i<rows.length;i++)for(let j=i+1;j<rows.length;j++)if(clash(rows[i],rows[j]))errors.push('Time conflict: '+rows[i].course+' / '+rows[j].course);
+  for(let i=0;i<rows.length;i++)for(let j=i+1;j<rows.length;j++)if(clash(rows[i],rows[j]))(p.allow_time_conflicts===true?warnings:errors).push('Time conflict: '+rows[i].course+' / '+rows[j].course);
   for(const r of selected){
    if(r.status!=='planned')errors.push(r.course+': reconcile '+r.status+' status first.');
    if(p.courses.some(o=>o!==r&&key(o.course)===key(r.course)&&['registered','uncertain'].includes(o.status)))errors.push(r.course+': registered or uncertain alternative exists.');
