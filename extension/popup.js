@@ -2,12 +2,35 @@
 const $=id=>document.getElementById(id);let pageGeneration=0,config=null,candidate=null,working=false;
 function status(t){$('status').textContent=t;}
 async function fetchPacket(){if(!config)throw Error('Connection required.');if(config.kind==='website'){const p=await SniperWebSource.read(config.tabId);if(!p.ready)throw Error((p.errors||['Preparation blocked.']).join('\n'));return p;}const r=await fetch(`http://127.0.0.1:${config.port}/api/bridge/plan`,{headers:{'X-Bridge-Key':config.key},cache:'no-store',signal:AbortSignal.timeout(8000)});const p=await r.json();if(!r.ok)throw Error(p.error||'Local app request failed.');if(!p.ready)throw Error((p.errors||['Preparation blocked.']).join('\n'));return p;}
-async function adapter(tabId,method,...args){const result=await chrome.scripting.executeScript({target:{tabId},func:async(method,args)=>{try{return {ok:true,result:await globalThis.SniperMockAdapter[method](...args)};}catch(e){return {ok:false,error:e.message};}},args:[method,args]});const answer=result[0]?.result;if(!answer?.ok)throw Error(answer?.error||'No adapter response.');return answer.result;}
+async function adapter(tabId,kind,method,...args){const result=await chrome.scripting.executeScript({target:{tabId},func:async(kind,method,args)=>{try{const api=kind==='suis'?globalThis.SniperSuisAdapter:globalThis.SniperMockAdapter;if(!api)throw Error('Page changed. Preview fields again.');return {ok:true,result:await api[method](...args)};}catch(e){return {ok:false,error:e.message};}},args:[kind,method,args]});const answer=result[0]?.result;if(!answer?.ok)throw Error(answer?.error||'No adapter response.');return answer.result;}
 async function task(fn){if(working)return;working=true;$('fill').disabled=true;$('preview').disabled=true;try{await fn();}catch(e){candidate=null;$('crn-list').textContent='';$('copy-crns').disabled=true;status(e.message);}finally{working=false;$('preview').disabled=false;$('fill').disabled=!candidate;}}
 $('connect').onclick=()=>task(async()=>{const port=Number($('port').value),key=$('key').value.trim();if(!Number.isInteger(port)||port<1024||port>65535||key.length<30)throw Error('Enter a valid local port and connection key.');config={port,key};candidate=null;$('crn-list').textContent='';$('copy-crns').disabled=true;await chrome.storage.session.set({connection:config});$('key').value='';status('Connected settings saved for this browser session. Load plan to verify.');$('connection').open=false;});
 $('disconnect').onclick=()=>task(async()=>{config=null;candidate=null;$('crn-list').textContent='';$('copy-crns').disabled=true;await chrome.storage.session.remove('connection');$('key').value='';$('mapping').textContent='';status('Disconnected.');});
-$('preview').onclick=()=>task(async()=>{candidate=null;$('mapping').textContent='';status('Loading…');const version=pageGeneration,packet=await fetchPacket();const [tab]=await chrome.tabs.query({active:true,currentWindow:true});const url=new URL(tab.url||'about:blank');if(url.protocol!=='http:'||url.hostname!=='127.0.0.1'||url.port!==String(config.port||8765)||url.pathname!=='/mock')throw Error('Open the local app mock form first. Live SUIS is unsupported.');await chrome.scripting.executeScript({target:{tabId:tab.id},files:['autofill-core.js','mock-adapter.js']});const preview=await adapter(tab.id,'preview',packet);if(version!==pageGeneration)throw Error('Active page changed. Preview again.');candidate={packet,preview,tabId:tab.id};$('mapping').textContent=preview.mapping.map(m=>m.id+' ← '+m.crn).join('\n');$('warnings').textContent=(packet.warnings||[]).join('\n');status(`Term ${packet.term} · revision ${packet.revision} · ${packet.crns.length} CRNs. ${preview.already?'Already filled.':'Ready for local test fill.'}`);});
-$('fill').onclick=()=>task(async()=>{if(!candidate)throw Error('Preview required.');const current=await fetchPacket();if(!SniperFillCore.samePacket(candidate.packet,current))throw Error('Plan changed after preview. Preview again.');const [tab]=await chrome.tabs.query({active:true,currentWindow:true});if(tab.id!==candidate.tabId)throw Error('Active tab changed. Preview again.');const result=await adapter(tab.id,'fill',candidate.packet,candidate.preview);candidate=null;status(result.message);});
+$('preview').onclick=()=>task(async()=>{
+ candidate=null;$('mapping').textContent='';status('Loading…');
+ const version=pageGeneration,packet=await fetchPacket(),[tab]=await chrome.tabs.query({active:true,currentWindow:true});
+ const url=new URL(tab?.url||'about:blank');let kind;
+ if(url.protocol==='http:'&&url.hostname==='127.0.0.1'&&url.port===String(config.port||8765)&&url.pathname==='/mock')kind='mock';
+ else if(url.origin==='https://suis.sabanciuniv.edu'&&/^\/prod\/bwskfreg\.[a-z0-9_]+$/i.test(url.pathname))kind='suis';
+ else throw Error('This page is unsupported. Open SUIS Add/Drop or the local mock form.');
+ if(version!==pageGeneration)throw Error('Active page changed. Preview again.');
+ await chrome.scripting.executeScript({target:{tabId:tab.id},files:['autofill-core.js',kind==='suis'?'suis-adapter.js':'mock-adapter.js']});
+ const preview=await adapter(tab.id,kind,'preview',packet);
+ if(version!==pageGeneration)throw Error('Active page changed. Preview again.');
+ candidate={packet,preview,tabId:tab.id,kind};
+ $('mapping').textContent=preview.mapping.map(m=>m.id+' ← '+m.crn).join('\n');
+ $('warnings').textContent=(packet.warnings||[]).join('\n');
+ status(`Term ${packet.term} · revision ${packet.revision} · ${packet.crns.length} CRNs. ${preview.already?'Already filled.':'Review the mapping, then Fill & verify.'}`);
+});
+$('fill').onclick=()=>task(async()=>{
+ const selected=candidate,version=pageGeneration;if(!selected)throw Error('Preview required.');
+ const current=await fetchPacket();
+ if(!SniperFillCore.samePacket(selected.packet,current))throw Error('Plan changed after preview. Preview again.');
+ const [tab]=await chrome.tabs.query({active:true,currentWindow:true});
+ if(version!==pageGeneration||candidate!==selected||tab?.id!==selected.tabId)throw Error('Active page changed. Preview again.');
+ const result=await adapter(selected.tabId,selected.kind,'fill',selected.packet,selected.preview);
+ candidate=null;status(result.message);
+});
 chrome.storage.session.get('connection').then(v=>{config=v.connection||null;if(config){if(config.port)$('port').value=config.port;status(config.kind==='website'?'Website connected. Refresh CRNs to load the current plan.':'Connection settings loaded.');}else $('connection').open=true;}).catch(e=>status(e.message));
 
 function clearPreview(){pageGeneration++;candidate=null;$('fill').disabled=true;$('mapping').textContent='';if(config)status(config.kind==='website'?'Website CRNs remain available. Copy reloads the current plan.':'Active page changed. Preview fields again.');}

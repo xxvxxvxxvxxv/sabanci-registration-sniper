@@ -83,7 +83,7 @@ The website requires no Python installation for visitors. Browser monitoring nee
 
 - **Available:** local planning, public seat monitoring, notification channels and the persistent extension side panel.
 - **Deployed on Cloudflare:** browser planner and shared public-data backend. Plan persistence, seat retrieval and sound were confirmed in a user smoke test. Real opening-event delivery and web Telegram delivery still require live verification.
-- **Prototype integration:** Extension 0.7 transfers prepared CRNs from the hosted website or local Python app into its side panel. Website transfer and current-plan copying pass automated tests with simulated Chrome APIs; an installed-Chrome check remains pending. Autofill is tested only on the bundled local mock form. A live SUIS form adapter is not implemented.
+- **Autofill integration:** Extension 0.8 transfers prepared CRNs from the hosted website or local Python app and can fill recognized SUIS registration inputs after preview. It verifies the term and field layout, protects existing values and reads back the result. Automated tests use sample forms and simulated Chrome APIs; compatibility with the actual live SUIS form remains unverified. Registration submission is manual. [Autofill setup](docs/AUTOFILL.md)
 
 The project does not log into SUIS or automatically enroll students. Institution-wide deployment would require further integration, operational testing and review of the institution's registration requirements.
 

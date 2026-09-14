@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "test": "node dom.cjs && node panel.cjs && node web-panel.cjs"
+    "test": "node dom.cjs && node panel.cjs && node web-panel.cjs && node suis.cjs"
   },
   "devDependencies": {
     "jsdom": "30.0.1"

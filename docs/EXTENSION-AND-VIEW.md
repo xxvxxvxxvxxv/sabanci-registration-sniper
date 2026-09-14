@@ -1,4 +1,4 @@
-# Extension 0.7 and timetable fit view
+# Extension 0.8 and timetable fit view
 
 ## Update the website
 
@@ -14,7 +14,7 @@ The timetable defaults to **Fit day**. Switch to **Detailed** to show full card 
 4. Open the hosted Registration Sniper website and the extension's side panel. Select **Use this website tab**.
 5. The prepared CRNs appear in the side panel. **Copy CRNs** re-reads the source tab before copying, including when another tab is active. Keep the source tab open.
 
-The updated extension requests access to the exact hosted app origin and clipboard writing, in addition to its existing local-app and side-panel permissions. It does not request blanket website access or university host permissions. The website origin is fixed in `extension/web-source.js` and `manifest.json`; update both if moving to a custom domain.
+The updated extension requests access to the exact hosted app origin and clipboard writing, in addition to its existing local-app and side-panel permissions. Version 0.8 also requests access to the exact SUIS origin for CRN autofill. It does not request blanket website access. The website origin is fixed in `extension/web-source.js` and `manifest.json`; update both if moving to a custom domain.
 
 ## Verify on Chrome
 
@@ -26,7 +26,7 @@ The updated extension requests access to the exact hosted app origin and clipboa
 
 ## Implementation status
 
-Website transfer, fresh-plan copying, tab navigation, source-origin restrictions and revision changes pass automated tests with simulated Chrome APIs. Existing mock autofill tests pass. Installed-Chrome testing must still be completed by the user. **Live SUIS autofill is not implemented.** No login or registration submission is performed.
+Website transfer, fresh-plan copying, tab navigation, source-origin restrictions and revision changes pass automated tests with simulated Chrome APIs. Existing mock autofill tests pass. Installed-Chrome testing must still be completed by the user. Version 0.8 includes a guarded SUIS autofill adapter tested against sample forms; actual live form compatibility remains unverified. See [Autofill setup](AUTOFILL.md). No login or registration submission is performed.
 
 ## Monitoring architecture
 

@@ -12,8 +12,8 @@ FILES=['app.py','catalog.py','choices.py','seats.py','phone.py','index.html','st
        'test_app.py','test_catalog.py','test_upgrade.py','test_seats.py','test_choices.py','test_import.py',
        'assets/FONT-LICENSE.txt','assets/heading.otf','assets/reticle.svg','data/catalog.json',
        'data/spring-registration-days.pdf','data/spring-rules.json','dev-tests/dom.cjs','dev-tests/panel.cjs',
-       'dev-tests/web-panel.cjs','dev-tests/package.json','scripts/build_release.py','docs/LOCAL-APP.md','docs/DEPLOYMENT.md','web/README.md']
-EXTENSION=['manifest.json','background.js','popup.html','popup.css','popup.js','autofill-core.js','mock-adapter.js','web-source.js']
+       'dev-tests/suis.cjs','dev-tests/web-panel.cjs','dev-tests/package.json','scripts/build_release.py','docs/LOCAL-APP.md','docs/DEPLOYMENT.md','web/README.md']
+EXTENSION=['manifest.json','background.js','popup.html','popup.css','popup.js','autofill-core.js','mock-adapter.js','web-source.js','suis-adapter.js']
 
 def build():
     out=ROOT/'dist';out.mkdir(exist_ok=True)
