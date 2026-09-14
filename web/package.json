@@ -10,7 +10,7 @@
     "dev": "wrangler dev",
     "check": "wrangler deploy --dry-run --outdir dist",
     "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy",
-    "test": "node tests/web.cjs && python3 tests/queue.py"
+    "test": "node tests/registration.cjs && node tests/web.cjs && python3 tests/queue.py"
   },
   "devDependencies": {
     "wrangler": "4.92.0",

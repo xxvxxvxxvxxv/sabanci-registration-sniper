@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Registration Sniper \u2014 CRN Side Panel",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Load prepared CRNs into a side panel; preview, fill and verify recognized SUIS registration fields. Manual submission only.",
   "permissions": [
     "activeTab",

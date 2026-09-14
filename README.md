@@ -35,6 +35,8 @@ The current implementation uses Sabancı's public course data. Its broader purpo
 | Availability-change detection | Alert on a full-to-available transition after establishing an initial baseline |
 | Sound, desktop and optional Telegram alerts | Bring an opening to the student's attention |
 | Timetable planning | Compare sections, visualize overlaps and prepare alternatives |
+| Registration days | Show program-based days from the 14 September 2026 official table, with senior and class restrictions |
+| Extension guide | Illustrated installation, website connection and CRN autofill workflow |
 | CRN preparation | Collect the selected section identifiers for registration |
 | Shared public-data cache | Reuse observations across website visitors and coordinate upstream requests |
 | Local personal storage | Keep plans on the device instead of collecting them in an application account |

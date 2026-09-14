@@ -49,3 +49,40 @@ main{padding-top:20px}.page-heading{margin-bottom:10px}h1{font-size:32px}.catalo
 .tt-compact .tt-times small{display:none}
 
 .tt-time,.tt-room{display:block}.tt-compact .tt-room{display:none}
+
+/* Registration-day context and illustrated extension guide. */
+a.nav-item{display:block;text-decoration:none;box-sizing:border-box}
+.registration-profile{display:flex;align-items:end;gap:16px;flex-wrap:wrap;border-block:1px solid var(--line);padding:12px 0;margin-bottom:10px}
+.registration-profile label{display:grid;gap:5px;font-size:11px;color:var(--muted);min-width:150px}
+.registration-profile select{padding:7px 10px;min-height:35px;width:100%}
+.registration-profile>small{margin-left:auto;align-self:center;font-size:10px;color:var(--muted)}
+.registration-selection{display:flex;flex-wrap:wrap;gap:6px}
+.registration-course{display:flex;align-items:center;gap:9px;padding:6px 9px;text-decoration:none;color:var(--text);border:1px solid var(--line);background:var(--panel);font-size:11px}
+.registration-course:hover{border-color:#8b849d}.registration-course:focus-visible{outline:2px solid #fff}
+.registration-badge{display:inline-block;width:fit-content;font:10px/1.3 ui-monospace,monospace;color:#d3dce8;white-space:normal}
+.registration-badge.restricted{color:#f1d682}
+.registration-note{font-size:10px;color:var(--muted);margin:8px 0 10px;line-height:1.5}
+.catalog-course-title .registration-badge{margin-top:7px;color:#9bcbbd}
+.tt-block>.registration-badge{font-size:8px;line-height:1.15;color:#fff;white-space:nowrap}
+.tt-compact .tt-block>.registration-badge{display:block;font-size:8px}
+.tt-compact .tt-block .tt-time{font-size:8px}
+.extension-intro{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 0 30px}
+.guide-kicker{font:11px ui-monospace,monospace;letter-spacing:1.5px;color:#b2a7c9}
+.extension-intro h2{font-size:32px;margin:12px 0 10px}.extension-intro p{color:var(--muted);font-size:14px;margin:0;line-height:1.6}
+.extension-intro>a{flex-shrink:0;text-decoration:none}
+.guide-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.guide-card{border:1px solid var(--line);background:var(--panel);min-width:0}
+.guide-step-heading{padding:20px;display:flex;gap:14px;align-items:center}
+.guide-step-heading h2{font-size:20px;margin:0}.guide-number{color:#f74762;font:18px ui-monospace,monospace}
+.guide-card>img{display:block;width:100%;height:auto;border-block:1px solid var(--line)}
+.guide-copy{padding:20px}.guide-copy ol{padding-left:19px;margin:0}.guide-copy li{padding-left:3px;margin-bottom:14px;font-size:13px;line-height:1.7;color:#cdcbd6}
+.guide-copy p{font-size:12px;color:var(--muted);line-height:1.6}.guide-copy code,.guide-help code{font-size:12px;overflow-wrap:anywhere;color:#c8b7e9}
+.guide-copy button{font-size:11px}.guide-status{display:flex;gap:12px;padding:18px 20px;margin-top:20px;background:#211d14;border:1px solid #51452c}
+.guide-status p{font-size:12px;line-height:1.6;margin:0;color:#dbd3be}.guide-status-dot{width:8px;height:8px;border-radius:50%;background:#f1d682;flex-shrink:0;margin-top:6px}
+.guide-help{margin-top:24px;border-top:1px solid var(--line)}.guide-help details{padding:16px 4px;border-bottom:1px solid var(--line)}.guide-help summary{font-size:13px;color:#e2dfe9}.guide-help p{font-size:13px;line-height:1.7;max-width:850px;color:var(--muted)}
+.guide-footnote{color:var(--muted);font-size:10px;padding:14px 0}
+#extension-guide-status:empty{display:none}
+@media(max-width:1250px){.guide-steps{grid-template-columns:1fr}.guide-card{display:grid;grid-template-columns:minmax(260px,1fr) 1fr}.guide-step-heading{grid-column:1/-1}.guide-card>img{align-self:center;border-bottom:0}.extension-intro{align-items:start}.extension-intro h2{font-size:28px}}
+@media(max-width:700px){.guide-card{display:block}.extension-intro{flex-direction:column}.registration-profile>small{margin-left:0;width:100%}.registration-profile label{flex:1}.sidebar nav{flex-wrap:wrap}.guide-copy{padding:18px}}
+
+.tt-tight>small,.tt-tight>span:not(.registration-badge){display:none}.tt-tiny>.registration-badge{display:none!important}

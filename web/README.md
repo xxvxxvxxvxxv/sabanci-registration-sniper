@@ -21,3 +21,15 @@ npm run dev
 No personal data or university credentials are seeded. The bundled catalog is a dated Fall 2026–27 snapshot. Production Cloudflare requests and real alert delivery still need verification after deployment.
 
 Run the browser behavior and shared queue checks with `npm test`. These checks use local fixtures and do not submit registrations.
+
+## Registration-day reference and extension guide
+
+The Timetable major/program selector and earned-credit band are saved under `sniper-registration-profile-v1` in localStorage. They do not change or verify the registration plan. Labels come from the bundled Fall 2026–2027 PDF (14 September 2026, 09:51), extracted into `public/registration-data.js`.
+
+- `D1?` requires at least 94 earned SU credits when the credit band is unspecified. Critical courses bypass only the senior restriction on Day 1.
+- `!` retains the PDF’s extra class restriction warning on every day.
+- Components use their explicit catalog parent course. Unknown manual codes and different semesters show **Check PDF**; no suffix-based pairing is invented.
+- The PDF supplies day numbers, not calendar dates or opening times. These are advisory labels, not permission to register.
+- **Registration days** opens the original bundled PDF in a new tab. **Extension** opens an illustrated guide within the app. Guide illustrations contain sample values and no personal screenshots.
+
+To regenerate this edition, install `pdfplumber` in the development environment and run `python scripts/import_registration_days.py path/to/CourseRegistrationDays_20260914.pdf` from the repository root. The importer validates the edition and table structure. Updating to a new semester requires reviewing the source metadata and tests.

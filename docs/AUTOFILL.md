@@ -1,9 +1,9 @@
-# CRN autofill — extension 0.8
+# CRN autofill — extension 0.8.1
 
 ## Install and use
 
-1. Extract `registration-sniper-extension-0.8.zip` into a permanent folder. In `chrome://extensions`, enable Developer mode and load the folder containing `manifest.json`. To update an existing unpacked installation, replace its files and click Reload. Accept Chrome's requested access to SUIS if prompted.
-2. Open the hosted planner, open the extension side panel and choose **Use this website tab**. Keep this source tab open. Alternatively, connect the local Python app using its port and bridge key.
+1. Extract `extension-package.zip` into a permanent folder. In `chrome://extensions`, enable Developer mode and load the folder containing `manifest.json`. To update an existing unpacked installation, replace its files and click Reload. Accept Chrome's requested access to SUIS if prompted.
+2. Open the hosted planner, open the extension side panel and choose **Use this website tab**. **No connection key is needed for the hosted website.** Keep this source tab open. Alternatively, connect the local Python app using its port and bridge key.
 3. Sign into SUIS normally and open the actual Add/Drop course registration form for the same term.
 4. Select **Preview CRN fields** in the side panel. Review the term and each CRN-to-field mapping.
 5. Select **Fill & verify** within 60 seconds. Review the values on SUIS and submit the form yourself.
@@ -23,3 +23,5 @@ Existing CRN values block replacement unless all fields already match the prepar
 Nineteen sample-form checks cover normal fill, read-back, no submission/events, unchanged unrelated values, inputs without IDs, wrong/missing/ambiguous terms, unsupported pages, unexpected destinations, occupied/hidden/disabled/readonly inputs, insufficient fields, multiple forms, element replacement, stale previews, plan changes and rollback. Side-panel tests cover routing preview/fill to the SUIS adapter. Existing website-transfer, local mock and monitoring tests are also retained.
 
 These are automated tests with synthetic forms and simulated Chrome APIs. **Actual live SUIS form compatibility and installed-Chrome operation remain to be verified.** If recognition fails, report the exact extension error and the CRN-field markup only, excluding credentials, cookies and other personal fields.
+
+The hosted website’s **Extension** page provides three original workflow illustrations and a download. The **Local Python app only** settings in the side panel are optional; the key field is only used with `127.0.0.1`.
