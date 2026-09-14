@@ -30,4 +30,5 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  assert(requests.every(([u,o])=>!o.body),'No private plans leave the browser.');assert(requests.every(([u])=>u.startsWith('/api/catalog')||u.startsWith('/api/seat')));
  assert.equal(JSON.parse(w.localStorage.getItem('sniper-web-plan-v1')).courses.length,10);
  dom.window.close();console.log('PASS: plan storage, atomic import, conflict geometry/colors, preparation, revision protection, monitor transitions, private network boundary.');
+ await require('./monitor.cjs')();
 })().catch(e=>{console.error(e);process.exit(1);});
