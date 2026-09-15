@@ -26,6 +26,6 @@
    return `<a class="registration-course" href="${REGISTRATION_DAYS.source}${result.page?'#page='+result.page:''}" target="_blank" rel="noopener noreferrer" title="${esc(result.detail)}" aria-label="${esc(result.detail)} Open official PDF"><b>${esc(code)}</b>${window.registrationBadge(row)}</a>`;
   }).join('');
   $('registration-note').textContent=String(plan.term)!==REGISTRATION_DAYS.term?'The available PDF is for Fall 2026–2027. Registration days for this semester are unverified.':
-   'D1 / D2 / D3 = registration days, not dates. D1? requires 94+ earned SU credits. ! = additional class restrictions. Course chips open the official PDF.';
+   'D1 / D2 / D3 = registration days, not dates. D1? requires 94+ earned SU credits. ! = additional class restrictions.';
  };
 })();

@@ -8,8 +8,10 @@ This package updates the hosted website and README. It does not change the Chrom
 
 ## Changes
 
-- Course selection uses only selected / not selected. Legacy outcome labels and priority no longer affect preparation. Existing selection checkboxes are preserved.
-- Copy CRNs appears beside Paste CRNs in Timetable and CRNs.
+- Course selection uses only selected / not selected. Legacy outcome labels and priority no longer affect preparation. Selections remain editable in Timetable.
+- CRNs shows only selected courses, sections and linked CRNs, with one Copy CRNs button. Manual entry, Edit, filters and the preparation sidebar are removed. Paste CRNs remains on Timetable.
+- Copying includes all selected CRNs, including overlapping classes. Extension autofill still uses its existing checks; its overlap option is now in Settings.
+- Timetable legend and other helper text are shorter.
 - Timetable has Fit day and Full info views again. The previous view preference is remembered. Full info uses a taller, scrollable grid; individual meetings do not scroll. The extra details cards below the grid have been removed.
 - Timetable blocks, catalog section links and CRN links open the matching SUIS section page for the current term.
 - Seats automatically follows selected sections. Custom watchlist, saved-alternative controls and repeated component summary cards are removed.
@@ -21,7 +23,7 @@ This package updates the hosted website and README. It does not change the Chrom
 ## Quick check after deployment
 
 1. Open Timetable. Confirm your selected sections survived. Click Copy CRNs, paste into a text editor, and open a course-page link. Switch between Fit day and Full info and confirm the choice survives a refresh.
-2. Open CRNs. Switch between Selected and Not selected. Toggle a section, then check that Seats follows the change automatically.
+2. Open CRNs and copy the list, including any overlapping classes. Change a selection in Timetable, then check that CRNs and Seats follow the change.
 3. While paused, choose 30 seconds in Seats, save and start. Check the observation timestamps. Send a Telegram test from Telegram notifications if connected.
 
 Automated checks cover old plans, selection changes during monitoring, clipboard output, extension bridge compatibility, timetable geometry and full details, 251 registration rules, 30-second Worker cache expiry, shared queue behavior, and Telegram opening transitions with simulated network responses. Worker dry-run build passed. Actual SUIS form compatibility and live deployment behavior still require verification.

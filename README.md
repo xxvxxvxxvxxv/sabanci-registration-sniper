@@ -1,3 +1,5 @@
+![Registration Sniper](docs/images/banner.png)
+
 # Registration Sniper
 
 A timetable planner and seat tracker for Sabancı University. Pick your sections, keep their CRNs together, and get notified when a full section opens up.
@@ -13,7 +15,7 @@ A timetable planner and seat tracker for Sabancı University. Pick your sections
 - Chrome side panel that previews and fills recognized SUIS CRN fields.
 - Optional **Aimbot prepare mode** to prepare the form after a new seat opening.
 
-Plans are saved in your browser. No account is needed. If you want to keep overlapping classes, enable **Allow time conflicts for this plan** on the CRNs page.
+Plans are saved in your browser. No account is needed. If you want to keep overlapping classes, enable **Allow overlapping classes in extension autofill** in Settings. Copying CRNs always includes your selected sections.
 
 ## Using it
 

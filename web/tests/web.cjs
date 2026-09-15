@@ -63,7 +63,7 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  const draft=await api('draft',allowed);assert(draft.ready);assert.equal(draft.crns.length,10);assert(draft.warnings.some(x=>x.startsWith('Time conflict:')));
  assert((await api('prepare',allowed)).ready);
  await vm.runInContext('runCheck()',dom.getInternalVMContext());
- assert(!w.document.getElementById('copy').disabled);assert(w.document.getElementById('prep-details').textContent.includes('allowed for this plan'));
+ assert(!w.document.getElementById('copy-top').disabled);assert.equal(w.document.getElementById('prep-details'),null);
  assert.equal(w.document.querySelectorAll('.tt-warning').length,2);
  // Use the released extension's actual reader with a simulated Chrome injection.
  dom.reconfigure({url:'https://sabanci-registration-sniper.sitegap-tools.workers.dev/'});
@@ -75,7 +75,10 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  await assert.rejects(api('draft',{...allowed,allow_time_conflicts:'true'}),/Invalid time conflict/);
  vm.runInContext('plan=JSON.parse(localStorage.getItem("sniper-web-plan-v1"));render();',dom.getInternalVMContext());assert(toggle.checked);
  toggle.checked=false;await toggle.onchange();await vm.runInContext('runCheck()',dom.getInternalVMContext());
- assert(!(await api('draft',await api('plan'))).ready);assert(w.document.getElementById('copy').disabled);assert(!(await bridge.SniperWebSource.read(1)).ready);
+ assert(!(await api('draft',await api('plan'))).ready);assert(!w.document.getElementById('copy-top').disabled);assert(!(await bridge.SniperWebSource.read(1)).ready);
+ let copied='';w.navigator.clipboard={writeText:async text=>{copied=text;}};
+ await w.document.getElementById('copy-top').onclick();
+ assert.deepEqual(copied.split(' '),Array.from(new Set((await api('plan')).courses.filter(r=>r.selected).flatMap(r=>w.SniperCore.ids(r)))));
 
  // A pending feed observation must clear its banner after recovery, without erasing other notices.
  vm.runInContext("seatState={crns:[],observations:{},events:[],combinations:[],running:true,reason:'Public feed is busy. Checks are queued; timestamps show freshness.'};renderSeats();",dom.getInternalVMContext());

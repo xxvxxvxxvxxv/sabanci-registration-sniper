@@ -45,10 +45,13 @@ const catalog=JSON.parse(fs.readFileSync('public/data/catalog.json'));
   evaluate("expandedCourse='CS 303';renderCatalog();");
   assert(w.document.querySelector('.section-link[href*="crn_in=10119"]'));
   assert(!w.document.querySelector('.save-fallback'));
-  $('filter').value='unselected';$('filter').onchange();assert.equal($('course-rows').children.length,1);
+  for(const id of ['filter','search','add','course-dialog','prep-details'])assert.equal($(id),null);
+  assert.equal($('course-rows').querySelectorAll('input,button').length,0);
+  evaluate("view('plan')");assert($('paste-crns').hidden);assert(!$('copy-top').hidden);
+  // A previously registered but unchecked section can be selected from the timetable.
+  await evaluate("chooseSection('13511')");
+  assert.equal($('course-rows').children.length,3);
   assert($('course-rows').textContent.includes('13511'));
-  // A previously registered but unchecked section can be selected normally.
-  const select=$('course-rows').querySelector('input');select.checked=true;await $('course-rows').onchange({target:select});
   assert((await api('seats')).crns.includes('13511'));
   await api('seats/config',{term:catalog.term,crns:[],interval:30});assert.equal((await api('seats')).interval,30);
   await api('seats/start');

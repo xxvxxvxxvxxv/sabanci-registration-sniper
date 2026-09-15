@@ -91,8 +91,8 @@ async function chooseSection(crn){
 }
 $('catalog-list').onclick=e=>{const section=e.target.closest('[data-crn]');if(section){chooseSection(section.dataset.crn);return;}const title=e.target.closest('[data-course]');if(title){expandedCourse=expandedCourse===title.dataset.course?'':title.dataset.course;renderCatalog();}};
 $('catalog-search').oninput=()=>{const q=key($('catalog-search').value);const exact=catalogData?.courses.find(c=>key(c.code)===q||c.offerings.some(o=>o.crn===q));if(exact)expandedCourse=exact.code;renderCatalog();};$('catalog-selected').onchange=renderCatalog;
-$('catalog-queue').onclick=async()=>{view('plan');await runCheck('draft');};
-$('catalog-refresh').onclick=async()=>{if(busy||!loaded)return;busy=true;$('catalog-refresh').disabled=true;notify('Fetching one public Sutable page…');try{catalogData=await api('catalog-refresh',{term:plan.term});invalidate();renderCatalog();notify('Catalog refreshed. Saved selections are checked against the new data when you prepare CRNs.');}catch(e){notify(e.message+' Previous catalog kept.',true);}finally{busy=false;$('catalog-refresh').disabled=false;renderCatalog();schedulePrepare();}};
+$('catalog-queue').onclick=()=>view('plan');
+$('catalog-refresh').onclick=async()=>{if(busy||!loaded)return;busy=true;$('catalog-refresh').disabled=true;notify('Refreshing courses…');try{catalogData=await api('catalog-refresh',{term:plan.term});invalidate();renderCatalog();notify('Courses refreshed.');}catch(e){notify(e.message+' Previous catalog kept.',true);}finally{busy=false;$('catalog-refresh').disabled=false;renderCatalog();schedulePrepare();}};
 api('catalog').then(c=>{catalogData=c;renderCatalog();schedulePrepare();}).catch(e=>notify('Catalog load failed: '+e.message,true));
 view('catalog');
 

@@ -120,3 +120,6 @@ body:has(#view-home:not([hidden])) .page-heading{display:none}
 .extension-simple .guide-help{margin-top:12px}
 @media(max-width:850px){.extension-simple .guide-steps{grid-template-columns:1fr}.extension-simple .guide-card{grid-template-columns:180px minmax(0,1fr);grid-template-rows:auto 1fr}.extension-simple .guide-step-heading{grid-column:1/-1}.extension-simple .guide-card>img{border:0}.extension-simple .extension-intro{align-items:flex-start;flex-wrap:wrap}}
 @media(max-width:480px){.extension-simple .guide-card{grid-template-columns:1fr}.extension-simple .guide-card>img{display:none}}
+
+/* CRNs is a compact list and one page action. */
+.crn-panel{max-width:1000px}.crn-table{width:100%}.crn-table td{padding:12px 18px;font-size:14px}.crn-table .crns{font-size:14px}.settings-overlap{margin:16px 24px}
