@@ -97,17 +97,14 @@ body:has(#view-home:not([hidden])) .page-heading{display:none}
 
 .welcome-credit{padding:12px 0 24px;text-align:center;font-size:12px;letter-spacing:.04em;color:var(--muted)}
 
-/* Fit the full day; keep section information readable and available at every size. */
-.tt-block{text-decoration:none;overflow:auto;scrollbar-width:thin;display:flex;flex-direction:column;align-items:flex-start;text-align:left;white-space:normal}
-.tt-compact .tt-block>span,.tt-compact .tt-room{display:block}
-.tt-compact .tt-block small{white-space:normal;font-size:10px}
-.tt-compact .tt-block b{white-space:normal;font-size:12px}
-.tt-compact .tt-block-title>span{overflow:visible;text-overflow:clip}
-.tt-block>*{flex-shrink:0}.section-link{display:block;padding:5px 8px 12px;font-size:12px;color:var(--purple)}
-.timetable-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:16px;border-top:1px solid var(--line)}
-.timetable-details:empty{display:none}.timetable-detail{padding:12px;background:var(--raised);border:1px solid var(--line)}
-.timetable-detail>a{display:flex;flex-wrap:wrap;gap:6px;justify-content:space-between;color:var(--purple);font-size:12px}
-.timetable-detail p{font-size:12px;line-height:1.55;margin:8px 0;overflow-wrap:anywhere}
+/* Timetable view controls restored; no scrolling inside individual meetings. */
+.tt-block{text-decoration:none;overflow:hidden}
+.tt-compact .tt-block>span{display:none}
+.tt-compact .tt-times small{display:none}
+.tt-compact .tt-room{display:none}
+.tt-tight>small,.tt-tight>span:not(.registration-badge){display:none}
+.tt-tiny>.registration-badge{display:none!important}
+.section-link{display:block;padding:5px 8px 12px;font-size:12px;color:var(--purple)}
 .notifications-label{font-size:12px;font-weight:600}.seat-actions{flex-wrap:wrap}.watch-config>p{flex:1;font-size:13px}
 .prep-panel>.check{margin:16px 18px}.table-scroll table{min-width:400px}
 
