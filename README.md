@@ -28,6 +28,8 @@ Keep the website open and your device awake while monitoring. Checks can run as 
 
 Install the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/bheoacdoacbliaddomhdnaecepojhadn) using **Add to Chrome**. Then open its side panel on the website and choose **Use this website tab**.
 
+Version **0.9.1** is available in source for testing: automatic planner detection and autofill, with no local-app connection. Trial and production form adapters pass sample-form tests; actual SUIS compatibility and automatic registration submission still need work. The store instructions above apply to published 0.9.0.
+
 **Autofill is still in beta.** Version 0.9 has been tested with sample forms, but the live SUIS Add/Drop form is not verified yet. The `/dolly/` trial system is not supported in this version. Login and final registration submission are manual; Aimbot does not keep sessions alive or register courses for you.
 
 ## Running locally

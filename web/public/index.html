@@ -7,7 +7,7 @@
 </section>
 <section id="view-plan" class="view" hidden><section class="panel crn-panel"><div class="table-scroll"><table class="crn-table"><thead><tr><th>Course</th><th>Section</th><th>CRN</th></tr></thead><tbody id="course-rows"></tbody></table></div><div id="empty" class="empty"><p>No courses selected.</p><button id="empty-add">Open timetable</button></div></section></section>
 <section id="view-seats" class="view" hidden>
-<div class="seat-toolbar"><div><span id="monitor-state" class="monitor-state">Paused</span><span id="monitor-cycle" class="muted"></span></div><div class="seat-actions"><span class="notifications-label">Notifications</span><button id="sound-toggle" aria-pressed="false">Sound off</button><button id="sound-test" disabled>Test</button><button id="desktop-toggle">Desktop notifications off</button><button id="phone-open">Telegram notifications off</button><button id="monitor-start" class="primary">Start</button></div></div>
+<div class="seat-toolbar"><div><span id="monitor-state" class="monitor-state">Paused</span></div><div class="seat-actions"><span class="notifications-label">Notifications</span><button id="sound-toggle" aria-pressed="false">Sound off</button><button id="desktop-toggle">Desktop notifications off</button><button id="phone-open">Telegram notifications off</button><button id="monitor-start" class="primary">Start</button></div></div>
 <div id="monitor-message" class="message" role="status"></div>
 <section class="panel watch-config"><p>Watching your timetable.</p><label>Check interval<select id="watch-interval"><option value="30">30 seconds</option><option value="60">1 minute</option><option value="120">2 minutes</option><option value="300">5 minutes</option><option value="600">10 minutes</option></select></label><button id="watch-save">Save interval</button></section>
 <section class="panel table-scroll"><table class="seats-table"><thead><tr><th>Section / CRN</th><th>Remaining</th><th>Enrolled / capacity</th><th>Last checked · Istanbul</th></tr></thead><tbody id="seat-rows"></tbody></table><div id="seats-empty" class="empty">Select course sections in Timetable to start watching their seats.</div></section>
@@ -15,14 +15,9 @@
 <details class="seat-log"><summary>Recent alerts <span id="seat-event-count"></span></summary><div id="seat-events"></div></details>
 </section>
 <section id="view-extension" class="view extension-simple" hidden>
- <div class="extension-intro"><div><span class="guide-kicker">CHROME EXTENSION · 0.9.0</span><h2>Your CRNs, ready to fill.</h2><p>Install from the Chrome Web Store, then connect your timetable.</p></div><a href="https://chromewebstore.google.com/detail/bheoacdoacbliaddomhdnaecepojhadn" target="_blank" rel="noopener noreferrer" class="button primary">Add to Chrome ↗</a></div>
- <div class="guide-steps">
-  <article class="guide-card"><div class="guide-step-heading"><span class="guide-number">01</span><h2>Install</h2></div><img src="/assets/guide-store-install.png" alt="Actual Chrome Web Store listing for Registration Sniper, showing the Add to Chrome button." width="640" height="320"><div class="guide-copy"><p>Click <b>Add to Chrome</b>, then <b>Add extension</b>.</p></div></article>
-  <article class="guide-card"><div class="guide-step-heading"><span class="guide-number">02</span><h2>Connect</h2></div><img src="/assets/guide-connect.svg" alt="Selected CRNs connect to the side panel with Use this website tab." width="640" height="320"><div class="guide-copy"><p>Select your courses. Open Chrome’s puzzle-piece menu → <b>Registration Sniper</b> → <b>Use this website tab</b>. No key needed.</p></div></article>
-  <article class="guide-card"><div class="guide-step-heading"><span class="guide-number">03</span><h2>Fill</h2></div><img src="/assets/guide-fill.svg" alt="Preview CRN fields, then Fill and verify. Review and submit in SUIS." width="640" height="320"><div class="guide-copy"><p>Open SUIS <b>Add/Drop</b> for the same term. Click <b>Preview CRN fields → Fill &amp; verify</b>. Review and submit manually.</p></div></article>
- </div>
- <p class="extension-note">Keep the timetable tab open. Live form compatibility is still unverified; version 0.9 does not support the <code>/dolly/</code> trial system.</p>
- <div class="guide-help"><details><summary>Already installed the ZIP version?</summary><p>Disable the unpacked copy at <code>chrome://extensions</code>, install from the store, then reconnect your timetable.</p></details><details><summary>Aimbot prepare mode</summary><p>Start Seats monitoring. In the extension, choose <b>Use this SUIS tab</b> on your SUIS tab, then enable <b>Prepare on a new seat opening</b>. It attempts to fill once after a new opening when all selected CRNs have fresh available seats. Keep the timetable, side panel and device awake. Login and final submission stay manual.</p></details></div>
+<a href="https://chromewebstore.google.com/detail/bheoacdoacbliaddomhdnaecepojhadn" target="_blank" rel="noopener noreferrer" class="button primary">Add to Chrome ↗</a>
+<ol class="extension-instructions"><li>Select your courses in the timetable.</li><li>Open Registration Sniper from Chrome’s Extensions menu.</li><li>Open SUIS Add/Drop. Your CRNs fill automatically.</li></ol>
+<p class="muted">Keep the timetable and extension panel open.</p>
 </section>
 </main></div>
 

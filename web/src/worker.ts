@@ -1,4 +1,4 @@
-import {catalog,seat} from './feed';
+import {catalog,seat,seats} from './feed';
 export default {
  async fetch(request:Request,env:any):Promise<Response>{
   const url=new URL(request.url);
@@ -6,6 +6,7 @@ export default {
    if(request.method!=='GET')return Response.json({error:'Method not allowed.'},{status:405,headers:{Allow:'GET'}});
    try{let value;
     if(url.pathname==='/api/catalog')value=await catalog(url.searchParams.get('term')||'202601');
+    else if(url.pathname==='/api/seats')value=await seats(url.searchParams.get('term')||'',(url.searchParams.get('crns')||'').split(','),Number(url.searchParams.get('interval')||30));
     else if(url.pathname==='/api/seat')value=await seat(url.searchParams.get('term')||'',url.searchParams.get('crn')||'');
     else return Response.json({error:'Not found.'},{status:404});
     return Response.json(value,{headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});

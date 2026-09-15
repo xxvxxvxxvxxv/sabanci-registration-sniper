@@ -12,9 +12,9 @@ module.exports=async function testMonitor(){
  w.fetch=async(url,options={})=>{
   let data;
   if(url==='/api/catalog')data=cat;
-  else if(url.startsWith('/api/seat?')){
-   requested.push(new URL(url,'https://sniper.test').searchParams.get('crn'));
-   data=pending?{pending:true,retry_after:10}:{capacity:80,actual:80-count,remaining:count,available:count,checked_at:new Date(now).toISOString()};
+  else if(url.startsWith('/api/seats?')){
+   const ids=new URL(url,'https://sniper.test').searchParams.get('crns').split(',');requested.push(ids);
+   data={observations:pending?{}:Object.fromEntries(ids.map(id=>[id,{capacity:80,actual:80-count,remaining:count,available:count,checked_at:new Date(now).toISOString()}])),pending:pending?ids:[]};
   }else if(url==='https://api.telegram.org/bot123456:synthetic_test_token_only/sendMessage'){
    messages.push(Object.fromEntries(options.body));
    if(failTelegram)throw Error('Simulated network outage');
@@ -30,7 +30,7 @@ module.exports=async function testMonitor(){
   await api('seats/config',{term:'202601',crns:[],interval:30,follow_plan:true,backups:false});
   await api('seats/start');
   for(let i=0;i<ids.length;i++){await tick();now+=10000;}
-  assert.deepEqual(requested,ids,'Pending retries must not starve later CRNs, including HUM 207/D');
+  assert.deepEqual(requested[0],ids,'The first request must queue the entire watchlist, including HUM 207/D');
   pending=false;
   for(let i=0;i<ids.length;i++){await tick();now+=10000;}
   let state=await api('seats');
@@ -54,6 +54,6 @@ module.exports=async function testMonitor(){
   failTelegram=true;await check(0);await check(1);
   assert.match((await api('phone')).last,/Telegram connection failed/);
   assert.equal((await api('seats')).running,true,'Delivery failure must not stop seat checks');
-  console.log('PASS: fair pending retries, HUM first checks, automatic Telegram transitions, deduplication, opt-out and delivery errors (mocked network).');
+  console.log('PASS: whole-watchlist polling, HUM checks, automatic Telegram transitions, deduplication, opt-out and delivery errors (mocked network).');
  }finally{dom.window.close();}
 };

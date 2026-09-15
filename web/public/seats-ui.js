@@ -13,7 +13,6 @@ function renderSeats(sync=false){
  if(sync){$('watch-interval').value=s.interval;watchDirty=false;}
  $('monitor-state').textContent=s.running?'Watching':'Paused';$('monitor-state').classList.toggle('on',s.running);
  $('seat-nav').textContent=s.running?'On':'Paused';
- $('monitor-cycle').textContent=`${s.crns.length} selected sections · ${s.interval}s interval · full pass at least ${s.cycle_seconds}s (shared queue may add time)`;
  $('monitor-start').textContent=s.running?'Pause':'Start';$('monitor-start').disabled=seatBusy;
  for(const id of ['watch-interval','watch-save'])$(id).disabled=s.running||seatBusy;
  $('seats-empty').hidden=s.crns.length>0;
@@ -92,11 +91,10 @@ $('monitor-start').onclick=()=>seatAction(async()=>{
 $('sound-toggle').onclick=async()=>{
  try{
   if(!soundEnabled){const Context=window.AudioContext||window.webkitAudioContext;if(!Context)throw Error('Audio unavailable in this browser.');audioCtx??=new Context();await audioCtx.resume();if(audioCtx.state!=='running')throw Error('Sound could not be enabled.');}
-  soundEnabled=!soundEnabled;$('sound-toggle').textContent=soundEnabled?'Sound on':'Sound off';$('sound-toggle').setAttribute('aria-pressed',String(soundEnabled));$('sound-test').disabled=!soundEnabled;
+  soundEnabled=!soundEnabled;$('sound-toggle').textContent=soundEnabled?'Sound on':'Sound off';$('sound-toggle').setAttribute('aria-pressed',String(soundEnabled));
   if(soundEnabled)await alarm();
  }catch(e){monitorMessage(e.message,true);}
 };
-$('sound-test').onclick=()=>alarm().catch(()=>monitorMessage('Audio unavailable.',true));
 $('desktop-toggle').onclick=async()=>{
  if(!('Notification' in window)){monitorMessage('Desktop notifications unavailable in this browser.',true);return;}
  try{

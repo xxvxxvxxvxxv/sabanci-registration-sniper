@@ -2,14 +2,16 @@
  'use strict';
  if(root.SniperSuisAdapter)return;
  let pending=null;
- const registrationPath=p=>/^\/prod\/bwskfreg\.[a-z0-9_]+$/i.test(p);
+ const registrationPath=p=>/^\/(?:prod|dolly)\/bwskfreg\.[a-z0-9_]+$/i.test(p);
  function inspect(){
   const url=new URL(location.href);
+  if(document.querySelector('input[type=password]'))throw Error('Sign in to SUIS, then open Add/Drop.');
+  if(/no term available|term not available for registration/i.test(document.body.textContent))throw Error('No registration term is available yet. Try again when Add/Drop opens.');
   if(url.origin!=='https://suis.sabanciuniv.edu'||!registrationPath(url.pathname))throw Error('Open the SUIS Add/Drop registration form. This page is unsupported.');
   const forms=[...document.forms].filter(f=>[...f.elements].some(n=>n instanceof HTMLInputElement&&n.name==='crn_in'&&n.type==='text'));
   if(forms.length!==1)throw Error('One CRN registration form could not be identified. Nothing filled.');
   const form=forms[0],action=new URL(form.action,location.href);
-  if(action.origin!==url.origin||!registrationPath(action.pathname)||form.method.toLowerCase()!=='post')throw Error('Unexpected registration form destination. Nothing filled.');
+  if(action.origin!==url.origin||!registrationPath(action.pathname)||action.pathname.split('/')[1]!==url.pathname.split('/')[1]||form.method.toLowerCase()!=='post')throw Error('Unexpected registration form destination. Nothing filled.');
   const nodes=[...form.elements].filter(n=>n instanceof HTMLInputElement&&n.name==='crn_in'&&n.type!=='hidden');
   if(!nodes.length||nodes.length>80)throw Error('CRN field layout is unsupported.');
   const terms=[...form.elements].filter(n=>n instanceof HTMLInputElement&&['term_in','term'].includes(n.name)).map(n=>n.value);

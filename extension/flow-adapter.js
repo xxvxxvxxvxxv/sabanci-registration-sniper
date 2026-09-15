@@ -1,7 +1,7 @@
 (function(root){
  'use strict';
  if(root.RiperFlow)return;
- const trusted=u=>u.origin==='https://suis.sabanciuniv.edu'&&/^\/prod\/(?:bwskfreg|bwskflib)\.[a-z0-9_]+$/i.test(u.pathname);
+ const trusted=u=>u.pathname.split('/')[1]===location.pathname.split('/')[1]&&u.origin==='https://suis.sabanciuniv.edu'&&/^\/(?:prod|dolly)\/(?:bwskfreg|bwskflib)\.[a-z0-9_]+$/i.test(u.pathname);
  const visible=n=>!n.matches(':disabled')&&n.getClientRects().length>0&&getComputedStyle(n).visibility==='visible';
  function inspect(term){
   const here=new URL(location.href);

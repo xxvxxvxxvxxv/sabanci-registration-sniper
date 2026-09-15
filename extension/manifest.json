@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Registration Sniper \u2014 CRN Side Panel",
-  "version": "0.9.0",
-  "description": "Prepare CRNs in a side panel and fill recognized SUIS fields after preview or a seat alert. Submit registration manually.",
+  "version": "0.9.1",
+  "description": "Loads selected CRNs from your planner and fills recognized SUIS Add/Drop fields automatically. Submit registration in SUIS.",
   "permissions": [
     "activeTab",
     "scripting",
@@ -11,7 +11,6 @@
     "clipboardWrite"
   ],
   "host_permissions": [
-    "http://127.0.0.1/*",
     "https://sabanci-registration-sniper.sitegap-tools.workers.dev/*",
     "https://suis.sabanciuniv.edu/*"
   ],

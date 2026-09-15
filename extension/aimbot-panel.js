@@ -35,7 +35,7 @@
     const current=await fetchPacket();valid();if(!SniperFillCore.samePacket(packet,current))throw Error('Plan changed before fill.');
     const latest=await observations();valid();if(RiperAimbot.decide({...run,state:'watching'},current,latest).action!=='prepare')throw Error('Seat data changed. Review before filling.');
     await adapter(targetId,'suis','fill',current,preview);valid();
-    stop('CRNs filled and verified. Review and submit in SUIS. Automatic submission remains off.');return;
+    stop('CRNs filled. Review and submit in SUIS.');return;
    }
    const signature=tab.url+'|'+state.kind;
    if(visited.has(signature))throw Error('Navigation did not advance. Review SUIS manually.');visited.add(signature);
@@ -45,10 +45,9 @@
   }
   throw Error('Navigation limit reached. Review SUIS manually.');
  }
- $('aimbot-target').onclick=async()=>{try{if(run)stop('Stopped to change target.');const [tab]=await chrome.tabs.query({active:true,currentWindow:true});if(new URL(tab?.url||'about:blank').origin!=='https://suis.sabanciuniv.edu')throw Error('Open your SUIS Add/Drop tab, then choose this button.');targetId=tab.id;output.textContent='SUIS tab selected. Keep it signed in. Enable Aimbot after starting the seat monitor.';}catch(e){output.textContent=e.message;}};
  toggle.onchange=async()=>{
   if(!toggle.checked){stop('Aimbot off.');return;}const id=++epoch;
-  try{if(!targetId)throw Error('Choose a SUIS tab first.');const packet=await fetchPacket(),seats=await observations();if(epoch!==id)return;const page=await flow(false,packet.term);if(epoch!==id)return;if(page.kind==='login')throw Error(page.message);run=RiperAimbot.arm(packet,seats);output.textContent='Armed for '+packet.crns.join(' ')+' · '+packet.term+'. Waiting for a new opening. Stops before registration submission.';}catch(e){if(epoch===id)stop(e.message);}
+  try{const tabs=await chrome.tabs.query({currentWindow:true}),suis=tabs.filter(t=>isSuis(t.url));const target=suis.find(t=>t.active)||(suis.length===1?suis[0]:null);if(!target)throw Error('Open the SUIS Add/Drop tab you want to use.');targetId=target.id;const packet=await fetchPacket(),seats=await observations();if(epoch!==id)return;const page=await flow(false,packet.term);if(epoch!==id)return;if(page.kind==='login')throw Error(page.message);run=RiperAimbot.arm(packet,seats);output.textContent='Waiting for a seat opening.';}catch(e){if(epoch===id)stop(e.message);}
  };
  setInterval(async()=>{
   if(!run||checking||run.state!=='watching')return;checking=true;const id=epoch;

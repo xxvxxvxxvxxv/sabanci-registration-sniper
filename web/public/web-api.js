@@ -3,22 +3,45 @@ window.SniperWeb=(()=>{
  const C=window.SniperCore,PKEY='sniper-web-plan-v1',SKEY='sniper-web-watch-v1',TKEY='sniper-web-telegram-v1';
  const empty=()=>({term:'202601',courses:[],history:[],overrides:[],revision:0,solver_scope:'saved'});
  const getPlan=()=>{const raw=localStorage.getItem(PKEY);return raw?C.validate(JSON.parse(raw)):empty();};
- let cat=null,revision=0,checking=false,releaseLock=null,acquiring=false,nextGlobal=0;const due=new Map(),failures=new Map();
+ let cat=null,revision=0,checking=false,releaseLock=null,acquiring=false,nextGlobal=0;
  let s={term:'202601',crns:[],interval:30,observations:{},events:[],serial:Date.now(),follow_plan:true,backups:false,running:false,reason:'',min_gap:10,cycle_seconds:30};
  try{const saved=JSON.parse(localStorage.getItem(SKEY)||'null');if(saved&&Array.isArray(saved.crns)&&saved.crns.every(x=>/^\d{5}$/.test(x))&&[30,60,120,300,600].includes(saved.interval))s={...s,...saved,running:false,reason:''};}catch{}
  const persistWatch=()=>{localStorage.setItem(SKEY,JSON.stringify({...s,running:false}));};
  const catalog=async()=>{if(cat)return cat;try{cat=await json('/api/catalog');}catch{cat=await json('/data/catalog.json');cat.refresh_note='Public catalog service unavailable. Showing the bundled dated snapshot.';}return cat;};
- async function json(url,options){const r=await fetch(url,{credentials:'omit',...options});let v;try{v=await r.json();}catch{throw Error('Service returned an unreadable response.');}if(!r.ok){const e=Error(v.error||'Service unavailable.');e.blocked=Boolean(v.blocked);e.retry_after=v.retry_after;throw e;}return v;}
+ async function json(url,options){const r=await fetch(url,{credentials:'omit',signal:AbortSignal.timeout(15000),...options});let v;try{v=await r.json();}catch{throw Error('Service returned an unreadable response.');}if(!r.ok){const e=Error(v.error||'Service unavailable.');e.blocked=Boolean(v.blocked);e.retry_after=v.retry_after;throw e;}return v;}
  function syncFollow(p){const crns=[...new Set(p.courses.filter(r=>r.selected).flatMap(C.ids))];s.follow_plan=true;s.backups=false;s.term=p.term;s.crns=crns;}
  // Ignore old custom watchlists and outcome flags; preserve every selection.
  try{syncFollow(getPlan());}catch{}
- async function save(p){C.validate(p);const work=()=>{const old=getPlan();if(p.revision!==old.revision)throw Error('Plan changed in another tab. Reload before saving.');const next=C.copy(p);next.revision++;const original=C.copy(s);try{syncFollow(next);for(const id of due.keys())if(!s.crns.includes(id)){due.delete(id);failures.delete(id);}localStorage.setItem(PKEY,JSON.stringify(next));persistWatch();revision++;return next;}catch(e){s=original;throw e;}};return navigator.locks?await navigator.locks.request('sniper-plan-write',work):work();}
+ async function save(p){C.validate(p);const work=()=>{const old=getPlan();if(p.revision!==old.revision)throw Error('Plan changed in another tab. Reload before saving.');const next=C.copy(p);next.revision++;const original=C.copy(s);try{syncFollow(next);localStorage.setItem(PKEY,JSON.stringify(next));persistWatch();revision++;return next;}catch(e){s=original;throw e;}};return navigator.locks?await navigator.locks.request('sniper-plan-write',work):work();}
  function snapshot(){s.cycle_seconds=Math.max(s.interval,s.crns.length*10);const result=C.copy(s);for(const o of Object.values(result.observations))o.stale=!o.checked_at||Date.now()-Date.parse(o.checked_at)>s.cycle_seconds*2000;try{const p=getPlan();result.combinations=C.combinations(p,result);result.opportunities=[];}catch{result.combinations=[];result.opportunities=[];}return result;}
  function stop(reason=''){s.running=false;s.reason=reason;revision++;if(releaseLock){releaseLock();releaseLock=null;}persistWatch();return snapshot();}
- async function start(){if(s.running)return snapshot();if(acquiring)throw Error('Monitor is starting.');if(!navigator.locks)throw Error('Use a browser with Web Locks support for reliable monitoring.');syncFollow(getPlan());if(!s.crns.length)throw Error('Select course sections in Timetable first.');await catalog();for(const id of s.crns)if(cat.term!==s.term||!C.lookup(cat,id))throw Error('Watch CRN '+id+' is not in this term’s catalog.');acquiring=true;return await new Promise((resolve,reject)=>{navigator.locks.request('sniper-seat-monitor',{ifAvailable:true},async lock=>{acquiring=false;if(!lock){reject(Error('Monitoring is already running in another tab. Use that tab or pause it first.'));return;}s.running=true;s.reason='';revision++;due.clear();failures.clear();nextGlobal=0;resolve(snapshot());await new Promise(r=>releaseLock=r);}).catch(e=>{acquiring=false;reject(e);});});}
+ async function start(){if(s.running)return snapshot();if(acquiring)throw Error('Monitor is starting.');if(!navigator.locks)throw Error('Use a browser with Web Locks support for reliable monitoring.');syncFollow(getPlan());if(!s.crns.length)throw Error('Select course sections in Timetable first.');await catalog();for(const id of s.crns)if(cat.term!==s.term||!C.lookup(cat,id))throw Error('Watch CRN '+id+' is not in this term’s catalog.');acquiring=true;return await new Promise((resolve,reject)=>{navigator.locks.request('sniper-seat-monitor',{ifAvailable:true},async lock=>{acquiring=false;if(!lock){reject(Error('Monitoring is already running in another tab. Use that tab or pause it first.'));return;}s.running=true;s.reason='';revision++;networkFailures=0;nextGlobal=0;resolve(snapshot());await new Promise(r=>releaseLock=r);}).catch(e=>{acquiring=false;reject(e);});});}
  function addEvent(crn,kind,remaining){const e={id:++s.serial,term:s.term,at:new Date().toISOString(),crn,kind,remaining};s.events.push(e);s.events=s.events.slice(-100);if(kind==='opened')sendPhone(e).catch(()=>{});}
- // Oldest due check first: a pending retry must not jump ahead of unchecked CRNs.
- async function tick(){if(!s.running||checking||Date.now()<nextGlobal)return;const id=s.crns.filter(x=>(due.get(x)||0)<=Date.now()).sort((a,b)=>(due.get(a)||0)-(due.get(b)||0))[0];if(!id)return;checking=true;nextGlobal=Date.now()+10000;const seq=revision,term=s.term;try{const o=await json('/api/seat?term='+term+'&crn='+id);if(seq!==revision||!s.running)return;if(o.pending){due.set(id,Date.now()+Math.max(10,o.retry_after||10)*1000);s.reason='Public feed is busy. Checks are queued; timestamps show freshness.';return;}const old=s.observations[id];s.observations[id]=o;failures.delete(id);due.set(id,Date.now()+s.interval*1000);s.reason='';if(old&&!old.error&&old.available<=0&&o.available>0&&Date.parse(o.checked_at)>Date.parse(old.checked_at))addEvent(id,'opened',o.available);persistWatch();}catch(e){if(seq!==revision||!s.running)return;if(e.retry_after&&!e.blocked){due.set(id,Date.now()+Math.max(10,e.retry_after)*1000);s.reason=e.message;return;}s.observations[id]={...s.observations[id],error:e.message};const n=(failures.get(id)||0)+1;failures.set(id,n);due.set(id,Date.now()+s.interval*1000*2**Math.min(n,3));if(e.blocked||n>=3){addEvent(id,'stopped');stop(e.message);}else persistWatch();}finally{checking=false;}}
+ // Collect the full watchlist each time; the server schedules shared upstream checks.
+ let networkFailures=0;
+ async function tick(){
+  if(!s.running||checking||Date.now()<nextGlobal||!s.crns.length)return;
+  checking=true;nextGlobal=Date.now()+10000;const seq=revision,term=s.term;
+  try{
+   const batch=await json('/api/seats?term='+term+'&crns='+s.crns.join(',')+'&interval='+s.interval);
+   if(seq!==revision||!s.running)return;
+   if(!batch.observations||!Array.isArray(batch.pending))throw Error('Seat service needs updating.');
+   for(const id of s.crns){
+    const o=batch.observations[id];if(!o)continue;
+    const old=s.observations[id];
+    if(o.error){s.observations[id]={...old,error:o.error};continue;}
+    const at=Date.parse(o.checked_at);if(!Number.isFinite(at)||at>Date.now()+5000||old?.checked_at&&at<Date.parse(old.checked_at))continue;
+    s.observations[id]=o;
+    if(old&&old.available<=0&&o.available>0&&at>Date.parse(old.checked_at)&&Date.now()-at<=Math.max(s.interval,s.crns.length*10)*2000)addEvent(id,'opened',o.available);
+   }
+   networkFailures=0;s.pending=batch.pending;s.reason='';persistWatch();
+  }catch(e){
+   if(seq!==revision||!s.running)return;
+   if(e.blocked){addEvent('','stopped');stop(e.message);return;}
+   networkFailures++;nextGlobal=Date.now()+Math.min(60000,10000*2**Math.min(networkFailures,3));
+   s.reason='Connection interrupted. Retrying…';
+  }finally{checking=false;}
+ }
  setInterval(tick,1000);
  window.addEventListener('pagehide',()=>stop());
  window.addEventListener('storage',e=>{if(e.key===PKEY){if(s.running)stop('Plan changed in another tab. Reload and restart monitoring.');if(typeof notify==='function')notify('Plan changed in another tab. Reload to use the latest version.',true);}});

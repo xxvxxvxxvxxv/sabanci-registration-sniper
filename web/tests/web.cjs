@@ -7,7 +7,7 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  w.setInterval=f=>{intervals.push(f);return intervals.length;};
  const held=new Set();w.navigator.locks={request:async(name,options,cb)=>{if(typeof options==='function'){cb=options;options={};}if(held.has(name)&&options.ifAvailable)return cb(null);held.add(name);try{return await cb({name});}finally{held.delete(name);}}};
  w.document.modelContext={registerTool:t=>registered.push(t)};
- w.fetch=async(url,opts={})=>{requests.push([url,opts]);let data;if(url.startsWith('/api/catalog'))data=cat;else if(url.startsWith('/api/seat'))data={capacity:20,actual:20-seatCount,remaining:seatCount,available:seatCount,checked_at:new Date(w.Date.now()).toISOString()};else throw Error('Unexpected network destination '+url);return {ok:true,json:async()=>JSON.parse(JSON.stringify(data))};};
+ w.fetch=async(url,opts={})=>{requests.push([url,opts]);let data;if(url.startsWith('/api/catalog'))data=cat;else if(url.startsWith('/api/seats?'))data={observations:Object.fromEntries(new URL(url,'https://sniper.test').searchParams.get('crns').split(',').map(id=>[id,{capacity:20,actual:20-seatCount,remaining:seatCount,available:seatCount,checked_at:new Date(w.Date.now()).toISOString()}])),pending:[]};else throw Error('Unexpected network destination '+url);return {ok:true,json:async()=>JSON.parse(JSON.stringify(data))};};
  for(const f of ['boot.js','core.js','web-api.js','ui.js','registration-data.js','registration-core.js','registration-ui.js','catalog-ui.js','seats-ui.js','phone-ui.js','welcome.js'])vm.runInContext(source(f),dom.getInternalVMContext());
  await new Promise(r=>setTimeout(r,250));const api=w.SniperWeb.api,C=w.SniperCore;assert(!w.document.getElementById('view-home').hidden);for(const tick of intervals)tick();assert(w.document.getElementById('boot-screen').hidden);w.document.querySelector('[data-view="catalog"]').click();let p=await api('plan');assert.equal(p.courses.length,0);
  const text='10119 10123 13511 10350 10352 10355 12131 10218 10226';const preview=await api('crns/preview',{text,term:p.term,revision:p.revision});assert.equal(preview.rows.length,9);assert.equal(preview.errors.length,0);assert.equal((await api('plan')).courses.length,0);
@@ -48,7 +48,7 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  assert(!w.document.getElementById('view-extension').hidden);
  assert(w.document.getElementById('view-catalog').hidden);
  assert(w.document.getElementById('paste-crns').hidden);
- assert.equal(w.document.querySelectorAll('.guide-card img').length,3);
+ assert.equal(w.document.querySelectorAll('#view-extension img').length,0);assert.equal(w.document.querySelectorAll('.extension-instructions li').length,3);
  assert(w.document.querySelector('nav a[href$="20260914.pdf"]'));
  w.document.querySelector('[data-view="catalog"]').click();
  assert(!w.document.getElementById('view-catalog').hidden);

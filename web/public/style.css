@@ -123,3 +123,5 @@ body:has(#view-home:not([hidden])) .page-heading{display:none}
 
 /* CRNs is a compact list and one page action. */
 .crn-panel{max-width:1000px}.crn-table{width:100%}.crn-table td{padding:12px 18px;font-size:14px}.crn-table .crns{font-size:14px}.settings-overlap{margin:16px 24px}
+
+.extension-instructions{padding-left:20px;margin:24px 0;line-height:2}.extension-simple{max-width:760px}
