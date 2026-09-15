@@ -10,7 +10,7 @@ This package updates the hosted website and README. It does not change the Chrom
 
 - Course selection uses only selected / not selected. Legacy outcome labels and priority no longer affect preparation. Existing selection checkboxes are preserved.
 - Copy CRNs appears beside Paste CRNs in Timetable and CRNs.
-- Timetable has Fit day and Full info views again. The previous view preference is remembered. Full info uses a taller, scrollable grid; individual meetings do not scroll. The extra details cards below the grid have been removed.
+- The timetable always fits the day, ignoring the old view preference. Compact blocks retain their text and can scroll when space is short; readable section details also appear below the grid.
 - Timetable blocks, catalog section links and CRN links open the matching SUIS section page for the current term.
 - Seats automatically follows selected sections. Custom watchlist, saved-alternative controls and repeated component summary cards are removed.
 - Check intervals include 30 and 60 seconds. New watch settings default to 30 seconds; existing saved intervals are preserved.
@@ -20,7 +20,7 @@ This package updates the hosted website and README. It does not change the Chrom
 
 ## Quick check after deployment
 
-1. Open Timetable. Confirm your selected sections survived. Click Copy CRNs, paste into a text editor, and open a course-page link. Switch between Fit day and Full info and confirm the choice survives a refresh.
+1. Open Timetable. Confirm your selected sections survived. Click Copy CRNs, paste into a text editor, and open a course-page link. View the complete section details below the fitted grid.
 2. Open CRNs. Switch between Selected and Not selected. Toggle a section, then check that Seats follows the change automatically.
 3. While paused, choose 30 seconds in Seats, save and start. Check the observation timestamps. Send a Telegram test from Telegram notifications if connected.
 
