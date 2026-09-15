@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="en"><head><title>Registration Sniper</title><meta charset="utf-8"><link rel="stylesheet" href="popup.css"><script src="autofill-core.js" defer></script><script src="web-source.js" defer></script><script src="popup.js" defer></script><script src="aimbot-core.js" defer></script><script src="aimbot-panel.js" defer></script></head>
-<body><header><span>REGISTRATION SNIPER</span><b>YOUR CRNs</b></header><div class="badge">0.9.1</div>
+<body><header><span>REGISTRATION SNIPER</span><b>YOUR CRNs</b></header><div class="badge">0.10.0</div>
 <pre id="crn-list" aria-live="polite"></pre><button id="copy-crns" disabled>Copy CRNs</button><button id="open-website" class="primary" hidden>Open planner</button>
 <label class="toggle"><input id="autofill" type="checkbox" checked> Autofill Add/Drop</label>
+<label class="toggle"><input id="auto-submit" type="checkbox"> Auto submit</label>
 <p id="status" role="status" aria-live="polite">Finding your planner…</p>
-<section class="aimbot"><h2>AIMBOT</h2><label class="toggle"><input id="aimbot-enabled" type="checkbox"> Prepare on a new seat opening</label><p id="aimbot-status" role="status">Off</p></section>
-<footer>Keep the planner and this panel open. Sign in and submit registration in SUIS.</footer></body></html>
+<section class="aimbot"><h2>AIMBOT</h2><label class="toggle"><input id="aimbot-enabled" type="checkbox"> Auto-submit CRNs on available seats</label><p id="aimbot-status" role="status">Off</p></section>
+<footer>Keep the planner and panel open. If SUIS signs you out, sign back in to resume.</footer></body></html>

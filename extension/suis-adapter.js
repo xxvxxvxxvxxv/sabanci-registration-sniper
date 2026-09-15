@@ -1,11 +1,12 @@
 (function(root){
  'use strict';
  if(root.SniperSuisAdapter)return;
- let pending=null;
+ let pending=null,submission=null;
  const registrationPath=p=>/^\/(?:prod|dolly)\/bwskfreg\.[a-z0-9_]+$/i.test(p);
  function inspect(){
   const url=new URL(location.href);
-  if(document.querySelector('input[type=password]'))throw Error('Sign in to SUIS, then open Add/Drop.');
+  if(document.querySelector('input[type=password]'))throw Error('Sign in to SUIS. Automation resumes when you return to Add/Drop.');
+  if(/session\s+(?:has\s+)?expired|session\s+timeout/i.test(document.body.textContent))throw Error('SUIS session expired. Sign in again to resume.');
   if(/no term available|term not available for registration/i.test(document.body.textContent))throw Error('No registration term is available yet. Try again when Add/Drop opens.');
   if(url.origin!=='https://suis.sabanciuniv.edu'||!registrationPath(url.pathname))throw Error('Open the SUIS Add/Drop registration form. This page is unsupported.');
   const forms=[...document.forms].filter(f=>[...f.elements].some(n=>n instanceof HTMLInputElement&&n.name==='crn_in'&&n.type==='text'));
@@ -53,5 +54,35 @@
    throw Error(e.message+' Original values restored in attached fields. Review the form.');
   }
  }
- root.SniperSuisAdapter={preview,fill};
+
+ function checkSubmit(packet){
+  submission=null;
+  const found=inspect();
+  if(!root.SniperFillCore.prepare(packet,found.state).already)throw Error('CRN fields do not match your plan. Nothing submitted.');
+  const {form}=found;
+  for(const n of form.elements){
+   if(!n.disabled&&/^rsts_in$/i.test(n.name||'')&&!['','RE','RW'].includes(n.value))throw Error('An additional registration action is selected. Review SUIS manually.');
+   if(n instanceof HTMLSelectElement&&[...n.selectedOptions].some(o=>/drop|withdraw|delete/i.test(o.textContent)))throw Error('A drop or withdrawal is selected. Review SUIS manually.');
+   if(n instanceof HTMLInputElement&&['checkbox','radio'].includes(n.type)&&n.checked&&/drop|withdraw|delete/i.test(n.name+' '+n.value))throw Error('A drop or withdrawal is selected. Review SUIS manually.');
+  }
+  const buttons=[...form.elements].filter(n=>n.type==='submit'&&!n.matches(':disabled')&&n.getClientRects().length&&getComputedStyle(n).visibility==='visible'&&/^(submit changes|register|submit registration)$/i.test((n instanceof HTMLInputElement?n.value:n.textContent).trim()));
+  if(buttons.length!==1)throw Error('Registration Submit button not recognized. Submit manually.');
+  const button=buttons[0],action=new URL(button.getAttribute('formaction')||form.action,location.href);
+  if(action.href!==found.state.action||(button.getAttribute('formmethod')||form.method).toLowerCase()!=='post'||(button.getAttribute('formtarget')||form.target||'_self')!=='_self')throw Error('Unexpected Submit destination. Nothing submitted.');
+  if(!form.checkValidity())throw Error('Complete the required SUIS fields first.');
+  const token=crypto.randomUUID();submission={...found,button,token,identity:JSON.stringify([packet.term,packet.revision,packet.crns])};
+  return {token};
+ }
+ function submit(packet,ticket){
+  const saved=submission;submission=null;
+  if(!saved||saved.token!==ticket?.token||saved.identity!==JSON.stringify([packet.term,packet.revision,packet.crns]))throw Error('Submission check expired.');
+  const found=inspect();
+  if(found.form!==saved.form||found.nodes.some((n,i)=>n!==saved.nodes[i])||found.nodes.length!==saved.nodes.length)throw Error('Form changed before submission.');
+  root.SniperFillCore.unchanged({signature:JSON.stringify(saved.state)},found.state);
+  // Re-check button overrides and selected drop actions immediately before submission.
+  checkSubmit(packet);if(submission.button!==saved.button){submission=null;throw Error('Submit button changed.');}submission=null;
+  HTMLFormElement.prototype.requestSubmit.call(found.form,saved.button);
+  return {attempted:true,message:'Submit requested. Check the SUIS result.'};
+ }
+ root.SniperSuisAdapter={preview,fill,checkSubmit,submit};
 })(globalThis);

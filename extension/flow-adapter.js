@@ -6,9 +6,10 @@
  function inspect(term){
   const here=new URL(location.href);
   if(here.origin!=='https://suis.sabanciuniv.edu')throw Error('Unsupported SUIS origin.');
-  if(document.querySelector('input[type=password]'))return {kind:'login',message:'Sign in with the browser password manager, then arm again. Automatic login is pending live verification.'};
+  if(document.querySelector('input[type=password]'))return {kind:'login',message:'Sign in to SUIS. Aimbot will resume automatically.'};
   const body=document.body.innerText||document.body.textContent;
-  if(/session\s+(?:has\s+)?expired|session\s+timeout|access denied|too many requests|verify you are human|captcha/i.test(body))throw Error('Session expired or access check shown. Sign in or resolve it manually.');
+  if(/session\s+(?:has\s+)?expired|session\s+timeout/i.test(body))return {kind:'login',message:'SUIS session expired. Sign in to resume.'};
+  if(/access denied|too many requests|verify you are human|captcha/i.test(body))throw Error('Resolve the SUIS access check manually.');
   if(/no term available|term not available for registration/i.test(body))throw Error('Registration is not open for this term.');
   if(document.querySelector('input[name=crn_in]:not([type=hidden])'))return {kind:'crns'};
   const selectors=[...document.querySelectorAll('select[name=term_in]')].filter(visible);

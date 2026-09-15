@@ -10,11 +10,11 @@ function monitorMessage(text,error=false){$('monitor-message').textContent=text;
 function renderSeats(sync=false){
  if(!seatState)return;
  const s=seatState;
- if(sync){$('watch-interval').value=s.interval;watchDirty=false;}
+
  $('monitor-state').textContent=s.running?'Watching':'Paused';$('monitor-state').classList.toggle('on',s.running);
  $('seat-nav').textContent=s.running?'On':'Paused';
  $('monitor-start').textContent=s.running?'Pause':'Start';$('monitor-start').disabled=seatBusy;
- for(const id of ['watch-interval','watch-save'])$(id).disabled=s.running||seatBusy;
+
  $('seats-empty').hidden=s.crns.length>0;
  $('seat-rows').innerHTML=s.crns.map(crn=>{const o=s.observations[crn]||{},unknown=o.remaining===undefined,unreliable=unknown||Boolean(o.error)||o.stale;
  const count=o.available??o.remaining,remaining=unreliable?'Unknown':count;
@@ -72,7 +72,7 @@ async function pollSeats(){
  finally{setTimeout(pollSeats,2500);}
 }
 async function saveWatch(){
- seatState=await api('seats/config',{term:plan.term,crns:[],interval:Number($('watch-interval').value),follow_plan:true,backups:false});renderSeats(true);
+ seatState=await api('seats/config',{term:plan.term,crns:[],interval:30,follow_plan:true,backups:false});renderSeats(true);
 }
 async function seatAction(action){
  if(seatBusy||!loaded)return;
@@ -81,11 +81,9 @@ async function seatAction(action){
  catch(e){monitorMessage(e.message,true);}
  finally{seatBusy=false;renderSeats();}
 }
-$('watch-interval').onchange=()=>{watchDirty=true;};
-$('watch-save').onclick=()=>seatAction(saveWatch);
 $('monitor-start').onclick=()=>seatAction(async()=>{
  if(seatState?.running){seatState=await api('seats/stop',{});return;}
- if(watchDirty||!seatState?.crns.length||seatState.term!==plan.term)await saveWatch();
+ await saveWatch();
  seatState=await api('seats/start',{});
 });
 $('sound-toggle').onclick=async()=>{

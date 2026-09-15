@@ -24,7 +24,7 @@ This package updates the hosted website and README. It does not change the Chrom
 
 1. Open Timetable. Confirm your selected sections survived. Click Copy CRNs, paste into a text editor, and open a course-page link. Switch between Fit day and Full info and confirm the choice survives a refresh.
 2. Open CRNs and copy the list, including any overlapping classes. Change a selection in Timetable, then check that CRNs and Seats follow the change.
-3. While paused, choose 30 seconds in Seats, save and start. Check the observation timestamps. Send a Telegram test from Telegram notifications if connected.
+3. In Seats, click Start. Check the observation timestamps. Send a Telegram test from Telegram notifications if connected.
 
 Automated checks cover old plans, selection changes during monitoring, clipboard output, extension bridge compatibility, timetable geometry and full details, 251 registration rules, 30-second Worker cache expiry, shared queue behavior, and Telegram opening transitions with simulated network responses. Worker dry-run build passed. Actual SUIS form compatibility and live deployment behavior still require verification.
 
@@ -36,6 +36,6 @@ The Extension page contains the Web Store link, three short usage steps and a ke
 
 The browser now requests the whole watchlist through /api/seats every ten seconds. The server queues due sections together and returns all stored observations, retaining their original timestamps beyond the short shared cache TTL. This removes the old result-collection race. Shared upstream checks still run one at a time with a ten-second gap. The 30/60/120-second settings determine when sections become due; they cannot make twelve upstream requests complete within thirty seconds.
 
-Transient connection errors retry with bounded backoff and a request timeout. University access blocks still pause monitoring. The sound Test button and toolbar timing summary are removed. Enabling sound plays a sample.
+Transient connection errors retry with bounded backoff and a request timeout. University access blocks still pause monitoring. The sound Test button, interval selector and toolbar timing summary are removed. Stored slower preferences reset to 30 seconds. Enabling sound plays a sample.
 
 Upload both public and src files in this package so the new browser and Worker endpoints deploy together. No database migration is needed. Tests cover whole-watchlist queueing, collecting old results, each interval, notifications and website flows. University responses are simulated; deployment and live source performance still need checking.

@@ -21,16 +21,14 @@ Plans are saved in your browser. No account is needed. If you want to keep overl
 
 1. Open the website and choose your course sections in **Timetable**.
 2. Choose your major to see registration-day labels.
-3. Open **Seats**, choose an interval and click **Start**. Enable whichever notifications you want.
+3. Open **Seats**, click **Start**. Enable whichever notifications you want.
 4. Copy your CRNs, or follow the **Extension** page to install and connect the Chrome side panel.
 
 Keep the website open and your device awake while monitoring. Checks can run as often as every 30 seconds per section, but the shared queue can make a full watchlist take longer. Alerts fire when a previously full section becomes available; the first check establishes a baseline.
 
-Install the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/bheoacdoacbliaddomhdnaecepojhadn) using **Add to Chrome**. Then open its side panel on the website and choose **Use this website tab**.
+Install the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/bheoacdoacbliaddomhdnaecepojhadn). Version 0.10.0 detects your planner automatically. Open its side panel and SUIS Add/Drop; enable **Auto submit** if you want it to submit the filled CRNs. **Aimbot** waits until all selected sections have fresh available seats, then fills and submits once.
 
-Version **0.9.1** is available in source for testing: automatic planner detection and autofill, with no local-app connection. Trial and production form adapters pass sample-form tests; actual SUIS compatibility and automatic registration submission still need work. The store instructions above apply to published 0.9.0.
-
-**Autofill is still in beta.** Version 0.9 has been tested with sample forms, but the live SUIS Add/Drop form is not verified yet. The `/dolly/` trial system is not supported in this version. Login and final registration submission are manual; Aimbot does not keep sessions alive or register courses for you.
+**0.10.0 is a test build until published.** Automatic submission passes sample-form tests; live SUIS compatibility remains unverified. If SUIS signs you out, sign back in to resume. The extension does not store your password or keep the session alive. After a submission attempt, check SUIS for acceptance or errors.
 
 ## Running locally
 

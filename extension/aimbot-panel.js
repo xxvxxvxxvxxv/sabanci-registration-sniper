@@ -28,14 +28,16 @@
   for(let step=0;step<5;step++){
    valid();const packet=await fetchPacket();valid();if(RiperAimbot.identity(packet)!==run.identity)throw Error('Plan changed. Nothing further will be filled.');
    const tab=await chrome.tabs.get(targetId),state=await flow(false,packet.term);valid();
-   if(state.kind==='login')throw Error(state.message);
+   if(state.kind==='login'){run.state='watching';output.textContent=state.message;return;}
    if(state.kind==='crns'){
     await chrome.scripting.executeScript({target:{tabId:targetId},files:['autofill-core.js','suis-adapter.js']});valid();
     const preview=await adapter(targetId,'suis','preview',packet);valid();
     const current=await fetchPacket();valid();if(!SniperFillCore.samePacket(packet,current))throw Error('Plan changed before fill.');
     const latest=await observations();valid();if(RiperAimbot.decide({...run,state:'watching'},current,latest).action!=='prepare')throw Error('Seat data changed. Review before filling.');
     await adapter(targetId,'suis','fill',current,preview);valid();
-    stop('CRNs filled. Review and submit in SUIS.');return;
+    const finalPacket=await fetchPacket(),finalSeats=await observations();valid();
+    if(!SniperFillCore.samePacket(current,finalPacket)||RiperAimbot.decide({...run,state:'watching'},finalPacket,finalSeats).action!=='prepare')throw Error('Plan or seat data changed before submission.');
+    const sent=await submitPacket(targetId,finalPacket,()=>epoch===savedEpoch&&!!run&&toggle.checked);valid();stop(sent.message);return;
    }
    const signature=tab.url+'|'+state.kind;
    if(visited.has(signature))throw Error('Navigation did not advance. Review SUIS manually.');visited.add(signature);
@@ -47,11 +49,11 @@
  }
  toggle.onchange=async()=>{
   if(!toggle.checked){stop('Aimbot off.');return;}const id=++epoch;
-  try{const tabs=await chrome.tabs.query({currentWindow:true}),suis=tabs.filter(t=>isSuis(t.url));const target=suis.find(t=>t.active)||(suis.length===1?suis[0]:null);if(!target)throw Error('Open the SUIS Add/Drop tab you want to use.');targetId=target.id;const packet=await fetchPacket(),seats=await observations();if(epoch!==id)return;const page=await flow(false,packet.term);if(epoch!==id)return;if(page.kind==='login')throw Error(page.message);run=RiperAimbot.arm(packet,seats);output.textContent='Waiting for a seat opening.';}catch(e){if(epoch===id)stop(e.message);}
+  try{const tabs=await chrome.tabs.query({currentWindow:true}),suis=tabs.filter(t=>isSuis(t.url));const target=suis.find(t=>t.active)||(suis.length===1?suis[0]:null);if(!target)throw Error('Open the SUIS Add/Drop tab you want to use.');targetId=target.id;const packet=await fetchPacket(),seats=await observations();if(epoch!==id)return;const page=await flow(false,packet.term);if(epoch!==id)return;run=RiperAimbot.arm(packet,seats);output.textContent=page.kind==='login'?page.message:'Waiting for available seats.';}catch(e){if(epoch===id)stop(e.message);}
  };
  setInterval(async()=>{
   if(!run||checking||run.state!=='watching')return;checking=true;const id=epoch;
-  try{const packet=await fetchPacket(),seats=await observations();if(epoch!==id||!run)return;const decision=RiperAimbot.decide(run,packet,seats);
+  try{const packet=await fetchPacket(),seats=await observations();if(epoch!==id||!run)return;const page=await flow(false,packet.term);if(epoch!==id||!run)return;if(page.kind==='login'){output.textContent=page.message;return;}const decision=RiperAimbot.decide(run,packet,seats);
    if(decision.action==='stop')stop(decision.reason);
    if(decision.action==='prepare'){run.state='preparing';output.textContent='Opening detected. Preparing the SUIS form…';await prepare(id);}
   }catch(e){if(epoch===id)stop(e.message);}finally{checking=false;}

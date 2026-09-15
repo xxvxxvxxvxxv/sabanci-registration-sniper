@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Registration Sniper \u2014 CRN Side Panel",
-  "version": "0.9.1",
-  "description": "Loads selected CRNs from your planner and fills recognized SUIS Add/Drop fields automatically. Submit registration in SUIS.",
+  "version": "0.10.0",
+  "description": "Automatically fill SUIS Add/Drop CRNs, optionally submit registration, and watch for available seats from your planner.",
   "permissions": [
     "activeTab",
     "scripting",

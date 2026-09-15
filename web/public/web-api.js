@@ -6,6 +6,7 @@ window.SniperWeb=(()=>{
  let cat=null,revision=0,checking=false,releaseLock=null,acquiring=false,nextGlobal=0;
  let s={term:'202601',crns:[],interval:30,observations:{},events:[],serial:Date.now(),follow_plan:true,backups:false,running:false,reason:'',min_gap:10,cycle_seconds:30};
  try{const saved=JSON.parse(localStorage.getItem(SKEY)||'null');if(saved&&Array.isArray(saved.crns)&&saved.crns.every(x=>/^\d{5}$/.test(x))&&[30,60,120,300,600].includes(saved.interval))s={...s,...saved,running:false,reason:''};}catch{}
+ s.interval=30;
  const persistWatch=()=>{localStorage.setItem(SKEY,JSON.stringify({...s,running:false}));};
  const catalog=async()=>{if(cat)return cat;try{cat=await json('/api/catalog');}catch{cat=await json('/data/catalog.json');cat.refresh_note='Public catalog service unavailable. Showing the bundled dated snapshot.';}return cat;};
  async function json(url,options){const r=await fetch(url,{credentials:'omit',signal:AbortSignal.timeout(15000),...options});let v;try{v=await r.json();}catch{throw Error('Service returned an unreadable response.');}if(!r.ok){const e=Error(v.error||'Service unavailable.');e.blocked=Boolean(v.blocked);e.retry_after=v.retry_after;throw e;}return v;}
