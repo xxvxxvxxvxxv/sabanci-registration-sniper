@@ -25,3 +25,7 @@ This package updates the hosted website and README. It does not change the Chrom
 3. While paused, choose 30 seconds in Seats, save and start. Check the observation timestamps. Send a Telegram test from Telegram notifications if connected.
 
 Automated checks cover old plans, selection changes during monitoring, clipboard output, extension bridge compatibility, timetable geometry and full details, 251 registration rules, 30-second Worker cache expiry, shared queue behavior, and Telegram opening transitions with simulated network responses. Worker dry-run build passed. Actual SUIS form compatibility and live deployment behavior still require verification.
+
+## Published extension guide
+
+The Extension page now links to the public Chrome Web Store listing and uses three short, aligned Install / Connect / Fill cards. The README uses store installation instructions. Existing ZIP users can find migration instructions in the collapsed help section.

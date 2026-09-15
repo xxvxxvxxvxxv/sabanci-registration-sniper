@@ -28,5 +28,4 @@
   $('registration-note').textContent=String(plan.term)!==REGISTRATION_DAYS.term?'The available PDF is for Fall 2026–2027. Registration days for this semester are unverified.':
    'D1 / D2 / D3 = registration days, not dates. D1? requires 94+ earned SU credits. ! = additional class restrictions. Course chips open the official PDF.';
  };
- $('copy-extensions-address').onclick=async()=>{const ok=await copyText('chrome://extensions');$('extension-guide-status').textContent=ok?'Copied. Paste into Chrome’s address bar.':'Copy chrome://extensions into Chrome’s address bar.';};
 })();

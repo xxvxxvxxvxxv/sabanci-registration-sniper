@@ -110,3 +110,16 @@ body:has(#view-home:not([hidden])) .page-heading{display:none}
 .timetable-detail p{font-size:12px;line-height:1.55;margin:8px 0;overflow-wrap:anywhere}
 .notifications-label{font-size:12px;font-weight:600}.seat-actions{flex-wrap:wrap}.watch-config>p{flex:1;font-size:13px}
 .prep-panel>.check{margin:16px 18px}.table-scroll table{min-width:400px}
+
+/* Store installation guide: equal cards, compact copy, one-column mobile layout. */
+.extension-simple{max-width:1180px}
+.extension-simple .extension-intro{padding:12px 0 24px;align-items:center}
+.extension-simple .guide-steps{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+.extension-simple .guide-card{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto 1fr}
+.extension-simple .guide-step-heading{grid-column:auto;padding:16px;min-height:58px;box-sizing:border-box}
+.extension-simple .guide-card>img{width:100%;height:auto;aspect-ratio:2/1;object-fit:contain;align-self:start;border-block:1px solid var(--line)}
+.extension-simple .guide-copy{padding:16px}.extension-simple .guide-copy p{margin:0;font-size:13px;line-height:1.6}
+.extension-simple .extension-note{font-size:12px;line-height:1.6;color:var(--muted);margin:18px 0}
+.extension-simple .guide-help{margin-top:12px}
+@media(max-width:850px){.extension-simple .guide-steps{grid-template-columns:1fr}.extension-simple .guide-card{grid-template-columns:180px minmax(0,1fr);grid-template-rows:auto 1fr}.extension-simple .guide-step-heading{grid-column:1/-1}.extension-simple .guide-card>img{border:0}.extension-simple .extension-intro{align-items:flex-start;flex-wrap:wrap}}
+@media(max-width:480px){.extension-simple .guide-card{grid-template-columns:1fr}.extension-simple .guide-card>img{display:none}}

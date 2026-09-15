@@ -24,7 +24,7 @@ Plans are saved in your browser. No account is needed. If you want to keep overl
 
 Keep the website open and your device awake while monitoring. Checks can run as often as every 30 seconds per section, but the shared queue can make a full watchlist take longer. Alerts fire when a previously full section becomes available; the first check establishes a baseline.
 
-The extension is currently submitted to the Chrome Web Store and awaiting review. Until it is published, download the ZIP from the website, extract it, and load the folder through `chrome://extensions` → **Developer mode** → **Load unpacked**.
+Install the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/bheoacdoacbliaddomhdnaecepojhadn) using **Add to Chrome**. Then open its side panel on the website and choose **Use this website tab**.
 
 **Autofill is still in beta.** Version 0.9 has been tested with sample forms, but the live SUIS Add/Drop form is not verified yet. The `/dolly/` trial system is not supported in this version. Login and final registration submission are manual; Aimbot does not keep sessions alive or register courses for you.
 
