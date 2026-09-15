@@ -40,15 +40,15 @@ main{padding-top:20px}.page-heading{margin-bottom:10px}h1{font-size:32px}.catalo
 .tt-times span{height:var(--hour-height);box-sizing:border-box}
 .tt-times small{position:absolute;top:calc(var(--lesson-height) - 10px);margin:0;font-size:8px}
 .tt-compact .tt-block{padding:3px 5px;gap:1px}
-.tt-compact .tt-block>span{display:none}
+
 .tt-compact .tt-block small{white-space:nowrap}
 .tt-compact .tt-block small br{display:none}
 .tt-compact .tt-block small{font-size:8px}
 .tt-compact .tt-block b{font-size:11px;white-space:nowrap}
 .tt-compact .tt-block-title>span{overflow:hidden;text-overflow:ellipsis}
-.tt-compact .tt-times small{display:none}
 
-.tt-time,.tt-room{display:block}.tt-compact .tt-room{display:none}
+
+.tt-time,.tt-room{display:block}
 
 /* Registration-day context and illustrated extension guide. */
 a.nav-item{display:block;text-decoration:none;box-sizing:border-box}
@@ -85,7 +85,6 @@ a.nav-item{display:block;text-decoration:none;box-sizing:border-box}
 @media(max-width:1250px){.guide-steps{grid-template-columns:1fr}.guide-card{display:grid;grid-template-columns:minmax(260px,1fr) 1fr}.guide-step-heading{grid-column:1/-1}.guide-card>img{align-self:center;border-bottom:0}.extension-intro{align-items:start}.extension-intro h2{font-size:28px}}
 @media(max-width:700px){.guide-card{display:block}.extension-intro{flex-direction:column}.registration-profile>small{margin-left:0;width:100%}.registration-profile label{flex:1}.sidebar nav{flex-wrap:wrap}.guide-copy{padding:18px}}
 
-.tt-tight>small,.tt-tight>span:not(.registration-badge){display:none}.tt-tiny>.registration-badge{display:none!important}
 
 .brand span{display:grid;gap:3px}.brand b{font-size:32px;letter-spacing:2px}.brand small{font:7px ui-monospace,monospace;letter-spacing:.8px;color:#a7a0b5}.brand img{width:42px;height:42px}
 #boot-screen{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#09090e}#boot-screen[hidden]{display:none}#boot-screen>b{font:700 24px Arial,sans-serif;letter-spacing:5px}#boot-screen>span{font-size:12px;color:#aaa3b9}#boot-dismiss{font-size:10px;margin-top:20px;background:transparent;color:#aaa3b9}
@@ -97,3 +96,17 @@ body:has(#view-home:not([hidden])) .page-heading{display:none}
 .brand span{display:block;font-size:13px;letter-spacing:.8px}.brand b{display:inline;font-size:29px;letter-spacing:.8px}.brand img{width:43px;height:43px}#boot-screen>b{font-size:19px;letter-spacing:2px;text-align:center}.welcome-hero>img{opacity:.9}
 
 .welcome-credit{padding:12px 0 24px;text-align:center;font-size:12px;letter-spacing:.04em;color:var(--muted)}
+
+/* Fit the full day; keep section information readable and available at every size. */
+.tt-block{text-decoration:none;overflow:auto;scrollbar-width:thin;display:flex;flex-direction:column;align-items:flex-start;text-align:left;white-space:normal}
+.tt-compact .tt-block>span,.tt-compact .tt-room{display:block}
+.tt-compact .tt-block small{white-space:normal;font-size:10px}
+.tt-compact .tt-block b{white-space:normal;font-size:12px}
+.tt-compact .tt-block-title>span{overflow:visible;text-overflow:clip}
+.tt-block>*{flex-shrink:0}.section-link{display:block;padding:5px 8px 12px;font-size:12px;color:var(--purple)}
+.timetable-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:16px;border-top:1px solid var(--line)}
+.timetable-details:empty{display:none}.timetable-detail{padding:12px;background:var(--raised);border:1px solid var(--line)}
+.timetable-detail>a{display:flex;flex-wrap:wrap;gap:6px;justify-content:space-between;color:var(--purple);font-size:12px}
+.timetable-detail p{font-size:12px;line-height:1.55;margin:8px 0;overflow-wrap:anywhere}
+.notifications-label{font-size:12px;font-weight:600}.seat-actions{flex-wrap:wrap}.watch-config>p{flex:1;font-size:13px}
+.prep-panel>.check{margin:16px 18px}.table-scroll table{min-width:400px}

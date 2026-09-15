@@ -1,133 +1,63 @@
-<p align="center">
-  <img src="docs/images/banner.png" alt="Registration Sniper — Timetables. Seat alerts. CRNs." width="100%">
-</p>
+# Registration Sniper
 
-<p align="center">
-  <strong>A reference project for course availability notifications.</strong><br>
-  Built around Sabancı University. A practical starting point for similar systems elsewhere.
-</p>
+A timetable planner and seat tracker for Sabancı University. Pick your sections, keep their CRNs together, and get notified when a full section opens up.
 
-<p align="center">
-  <a href="#the-idea">The idea</a> ·
-  <a href="https://sabanci-registration-sniper.sitegap-tools.workers.dev">Live website</a> ·
-  <a href="#how-it-works">Architecture</a> ·
-  <a href="#adapting-the-project">Adaptation</a> ·
-  <a href="#run-the-project">Setup</a>
-</p>
+[Open the website](https://sabanci-registration-sniper.sitegap-tools.workers.dev/)
 
----
+## Features
 
-## The idea
+- Weekly timetable with course colors, conflict highlights, room details and links to SUIS course pages.
+- Registration-day labels for your major, with the official registration PDF available in the app.
+- Copy or paste CRNs. Your selected sections automatically become your seat watchlist.
+- Seat alerts through sound, desktop notifications or Telegram.
+- Chrome side panel that previews and fills recognized SUIS CRN fields.
+- Optional **Aimbot prepare mode** to prepare the form after a new seat opening.
 
-A full course can become available at any moment. Without notifications, students have to revisit registration pages and check the same sections repeatedly.
+Plans are saved in your browser. No account is needed. If you want to keep overlapping classes, enable **Allow time conflicts for this plan** on the CRNs page.
 
-**Registration Sniper explores a more useful workflow:** choose sections, observe availability, and receive an alert when a previously full section has an opening. A timetable and prepared course identifiers connect that notification to the student's registration plan.
+## Using it
 
-The current implementation uses Sabancı's public course data. Its broader purpose is to demonstrate how availability monitoring, personal subscriptions and notifications can fit together—for another university, a workshop booking system, or another service with limited capacity.
+1. Open the website and choose your course sections in **Timetable**.
+2. Choose your major to see registration-day labels.
+3. Open **Seats**, choose an interval and click **Start**. Enable whichever notifications you want.
+4. Copy your CRNs, or follow the **Extension** page to install and connect the Chrome side panel.
 
-**This is a working example with institution-specific integrations, not a universal registration platform.** Adapting it requires a suitable data source and the destination system's own rules.
+Keep the website open and your device awake while monitoring. Checks can run as often as every 30 seconds per section, but the shared queue can make a full watchlist take longer. Alerts fire when a previously full section becomes available; the first check establishes a baseline.
 
-## What the project demonstrates
+The extension is currently submitted to the Chrome Web Store and awaiting review. Until it is published, download the ZIP from the website, extract it, and load the folder through `chrome://extensions` → **Developer mode** → **Load unpacked**.
 
-| Capability | Purpose |
-| :--- | :--- |
-| Section watchlists | Follow relevant courses and saved alternatives |
-| Availability-change detection | Alert on a full-to-available transition after establishing an initial baseline |
-| Sound, desktop and optional Telegram alerts | Bring an opening to the student's attention |
-| Timetable planning | Compare sections, visualize overlaps and prepare alternatives |
-| Registration days | Show program-based days from the 14 September 2026 official table, with senior and class restrictions |
-| Extension guide | Illustrated installation, website connection and CRN autofill workflow |
-| CRN preparation | Collect the selected section identifiers for registration |
-| Shared public-data cache | Reuse observations across website visitors and coordinate upstream requests |
-| Local personal storage | Keep plans on the device instead of collecting them in an application account |
+**Autofill is still in beta.** Version 0.9 has been tested with sample forms, but the live SUIS Add/Drop form is not verified yet. The `/dolly/` trial system is not supported in this version. Login and final registration submission are manual; Aimbot does not keep sessions alive or register courses for you.
 
-## How it works
+## Running locally
 
-The system separates **observing availability** from **completing registration**. A source adapter reads course and capacity data; the monitor compares observations; notification channels report relevant changes. Enrollment remains in the institution's registration system.
-
-| Layer | Current implementation | Adaptation point |
-| :--- | :--- | :--- |
-| Data source | Sutable catalog and public SUIS section pages | Official API, permitted public feed or institution-provided integration |
-| Availability model | Term, section CRN, capacity, enrollment and remaining seats | Local identifiers, waitlists, shared capacity and reservation rules |
-| Monitoring | Local Python process, or an open browser tab using a shared Cloudflare feed | Scheduling and event delivery appropriate to the host environment |
-| Notifications | Sound, desktop and a personal Telegram bot | Notification channels supported by the deployment |
-| User workspace | Timetable, watchlist and prepared CRNs | Local course structure and registration workflow |
-
-The web backend uses **Cloudflare Workers + D1** to cache public observations and coordinate requests. Personal plans stay in browser storage. Optional web Telegram delivery connects directly from the browser to Telegram.
-
-Unknown or failed observations must remain unknown. An available seat is not a reservation or proof that a particular student is eligible.
-
-## Timing and reliability
-
-The default monitor interval is 120 seconds per CRN. Public observations are cached for 120 seconds, and upstream seat requests share a queue with a minimum 10-second gap after a completed request. Cache age, queue load, network latency and browser suspension can delay an alert beyond two minutes. Very brief openings can be missed. The observation timestamp is the freshness indicator; this is not an instant seat feed.
-
-## Adapting the project
-
-1. **Connect the data source.** Replace the Sabancı adapters with the institution's supported integration. The current code is in `catalog.py`, `seats.py` and `web/src/parsers.mjs`.
-2. **Define availability correctly.** Map identifiers and capacity fields. Account for reserved seats, waitlists and shared quotas where applicable.
-3. **Model course relationships.** Specify which lectures, labs, recitations or discussions belong together. Instructor names alone do not establish valid combinations.
-4. **Set the monitoring policy.** Match the source's update frequency and access requirements. Reuse cached observations and stop on access blocks rather than repeatedly retrying them.
-5. **Validate notification behavior.** Check first observations, genuine openings, stale data, source failures and delivery to the intended recipient before rollout.
-
-The same pattern can be explored for seminar seats, laboratory sessions, appointments or equipment bookings. Those environments are **potential adaptations**, not integrations included in this repository.
-
-## Run the project
-
-| Version | Start here |
-| :--- | :--- |
-| Local Python app | Run `python3 app.py`, then open `http://127.0.0.1:8765`. [Local guide](docs/LOCAL-APP.md) |
-| Hosted website and public-data backend | Deploy `web/` to Cloudflare Workers + D1. [Deployment guide](docs/DEPLOYMENT.md) |
-| Chrome side panel | Load `extension/` through Chrome's extension developer settings. [Setup and limitations](docs/EXTENSION-AND-VIEW.md) |
-
-The website requires no Python installation for visitors. Browser monitoring needs an open tab and an awake device; local monitoring needs the Python process to remain running. Continuous server-side personal subscriptions are not implemented.
-
-## Implementation status
-
-- **Available:** local planning, public seat monitoring, notification channels and the persistent extension side panel.
-- **Deployed on Cloudflare:** browser planner and shared public-data backend. Plan persistence, seat retrieval and sound were confirmed in a user smoke test. Real opening-event delivery and web Telegram delivery still require live verification.
-- **Autofill integration:** Extension 0.9 transfers prepared CRNs from the hosted website or local Python app and can fill recognized SUIS registration inputs after preview. It verifies the term and field layout, protects existing values and reads back the result. Automated tests use sample forms and simulated Chrome APIs; compatibility with the actual live SUIS form remains unverified. Registration submission is manual. [Autofill setup](docs/AUTOFILL.md)
-
-The project does not log into SUIS or automatically enroll students. Institution-wide deployment would require further integration, operational testing and review of the institution's registration requirements.
-
-<details>
-<summary><strong>Development checks</strong></summary>
+The local Python version starts with:
 
 ```bash
-python3 -m unittest discover -v
-node --test extension/test-autofill.cjs
+python3 app.py
 ```
 
-For the web application:
+Then open `http://127.0.0.1:8765`. See the [local setup guide](docs/LOCAL-APP.md).
+
+The hosted version is in `web/` and uses Cloudflare Workers and D1:
 
 ```bash
 cd web
 npm ci
+npm run dev
+```
+
+See [deployment instructions](docs/DEPLOYMENT.md) for database setup and publishing. The browser interface and local Python app are maintained separately.
+
+## Development
+
+```bash
+cd web
 npm test
 npm run check
 ```
 
-Checks cover planning, persistence, imports, overlap rendering, monitor transitions, mock-form guards and shared queue coordination. A passing local test does not establish compatibility with a live registration system. See the [web development notes](web/README.md).
+The Chrome extension source is in `extension/`. [Autofill notes](docs/AUTOFILL.md) · [Aimbot notes](docs/AIMBOT.md) · [Privacy](PRIVACY.md)
 
-</details>
+Course data comes from [Sutable](https://sutable.vercel.app/202601) and [SUIS](https://suis.sabanciuniv.edu/). Registration-day labels use the official table dated 14 September 2026.
 
-## Data and privacy
-
-Plans are stored locally. The public-feed backend receives requested terms and CRNs; it does not receive complete plans or web Telegram tokens. Hosting and source providers still receive normal connection metadata. University passwords are not requested.
-
-See [privacy and data destinations](PRIVACY.md) for storage, notification and backup details.
-
-## Sources and credits
-
-The Sabancı example uses [Sutable](https://sutable.vercel.app/202601), [public SUIS section data](https://suis.sabanciuniv.edu/) and the [official registration hub](https://bannerweb.sabanciuniv.edu/).
-
-The bundled Fall 2026–27 catalog is a dated snapshot. The included Spring 2026 registration PDF is historical and does not define Fall registration windows.
-
-Typography: Nimbus Sans Narrow Bold — [font license](assets/FONT-LICENSE.txt). Banner: original generated project artwork.
-
-**Independent student project. Not affiliated with or endorsed by Sabancı University.**
-
-## Registration Sniper 0.9
-
-The hosted app adds a first-visit homepage and an illustrated extension guide. Optional **[Aimbot prepare mode](docs/AIMBOT.md)** reacts to a new opening, navigates recognized Add/Drop steps and fills the exact CRN plan once. Login and final submission remain manual. Live trial compatibility is pending verification.
-
-[Release handoff](docs/RELEASE-0.9.md) · [Privacy](https://sabanci-registration-sniper.sitegap-tools.workers.dev/privacy.html)
+Made by xxv. Independent student project, not affiliated with Sabancı University.

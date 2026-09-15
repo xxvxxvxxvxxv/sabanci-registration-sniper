@@ -27,10 +27,8 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  const lessonHeight=parseFloat(scroll.style.getPropertyValue('--lesson-height'));
  assert(Math.abs(parseFloat(block.style.height)/lessonHeight-Math.round(parseFloat(block.style.height)/lessonHeight*10)/10)<0.001);
  const fitHeight=parseFloat(day.style.height);
- const sizing=w.document.getElementById('timetable-scale');sizing.value='comfortable';sizing.onchange();
- assert(parseFloat(w.document.querySelector('.tt-day').style.height)>fitHeight);
- assert.equal(w.localStorage.getItem('sniper-timetable-scale'),'comfortable');
- sizing.value='fit';sizing.onchange();w.innerHeight=700;w.dispatchEvent(new w.Event('resize'));
+ assert.equal(w.document.getElementById('timetable-scale'),null);
+ w.localStorage.setItem('sniper-timetable-scale','comfortable');w.innerHeight=700;w.dispatchEvent(new w.Event('resize'));
  assert(parseFloat(w.document.querySelector('.tt-day').style.height)<fitHeight);
  assert.equal(w.document.querySelectorAll('.tt-warning').length,2);
 
@@ -86,8 +84,9 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  vm.runInContext("seatState.reason='Public feed is busy.';renderSeats();monitorMessage('Desktop notification failed.',true);seatState.reason='';renderSeats();",dom.getInternalVMContext());
  assert.equal(w.document.getElementById('monitor-message').textContent,'Desktop notification failed.');
  const bad=JSON.parse(JSON.stringify(withClash));bad.courses[0].crns='oops';await assert.rejects(api('save',bad),/Invalid course/);
- await api('seats/config',{term:'202601',crns:['10119'],interval:120,follow_plan:false,backups:false});await api('seats/start',{});await intervals[0]();let s=await api('seats');assert.equal(s.events.length,0);assert.equal(s.observations['10119'].available,0);
- const now=w.Date.now();w.Date.now=()=>now+121000;seatCount=1;await intervals[0]();s=await api('seats');assert.equal(s.events.length,1);assert.equal(s.events[0].kind,'opened');await api('seats/stop',{});assert.equal((await api('seats')).running,false);
+ let monitored=await api('plan');monitored.courses.forEach(r=>r.selected=r.crns==='10119');await api('save',monitored);
+ await api('seats/config',{term:'202601',crns:[],interval:30,follow_plan:true,backups:false});await api('seats/start',{});await intervals[0]();let s=await api('seats');assert.equal(s.events.length,0);assert.equal(s.observations['10119'].available,0);
+ const now=w.Date.now();w.Date.now=()=>now+31000;seatCount=1;await intervals[0]();s=await api('seats');assert.equal(s.events.length,1);assert.equal(s.events[0].kind,'opened');await api('seats/stop',{});assert.equal((await api('seats')).running,false);
  assert(requests.every(([u,o])=>!o.body),'No private plans leave the browser.');assert(requests.every(([u])=>u.startsWith('/api/catalog')||u.startsWith('/api/seat')));
  assert.equal(JSON.parse(w.localStorage.getItem('sniper-web-plan-v1')).courses.length,10);
  dom.window.close();console.log('PASS: plan storage, atomic import, conflict geometry/colors, preparation, revision protection, monitor transitions, private network boundary.');

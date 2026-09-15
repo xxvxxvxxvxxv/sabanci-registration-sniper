@@ -10,20 +10,20 @@ function monitorMessage(text,error=false){$('monitor-message').textContent=text;
 function renderSeats(sync=false){
  if(!seatState)return;
  const s=seatState;
- if(sync){$('watch-crns').value=s.crns.join(' ');$('watch-interval').value=s.interval;$('watch-follow').checked=Boolean(s.follow_plan);$('watch-backups').checked=Boolean(s.backups);watchDirty=false;}
+ if(sync){$('watch-interval').value=s.interval;watchDirty=false;}
  $('monitor-state').textContent=s.running?'Watching':'Paused';$('monitor-state').classList.toggle('on',s.running);
  $('seat-nav').textContent=s.running?'On':'Paused';
- $('monitor-cycle').textContent=`Term ${s.term} · ~${s.cycle_seconds}s minimum cycle · ≥${s.min_gap}s between requests`;
+ $('monitor-cycle').textContent=`${s.crns.length} selected sections · ${s.interval}s interval · full pass at least ${s.cycle_seconds}s (shared queue may add time)`;
  $('monitor-start').textContent=s.running?'Pause':'Start';$('monitor-start').disabled=seatBusy;
- for(const id of ['watch-crns','watch-interval','watch-plan','watch-save','watch-follow','watch-backups'])$(id).disabled=s.running||seatBusy;
+ for(const id of ['watch-interval','watch-save'])$(id).disabled=s.running||seatBusy;
  $('seats-empty').hidden=s.crns.length>0;
  $('seat-rows').innerHTML=s.crns.map(crn=>{const o=s.observations[crn]||{},unknown=o.remaining===undefined,unreliable=unknown||Boolean(o.error)||o.stale;
  const count=o.available??o.remaining,remaining=unreliable?'Unknown':count;
  return `<tr><td><strong>${esc(seatLabel(crn))}</strong><a class="seat-source" href="https://suis.sabanciuniv.edu/prod/bwckschd.p_disp_detail_sched?term_in=${esc(s.term)}&amp;crn_in=${esc(crn)}" target="_blank" rel="noreferrer">${esc(crn)} ↗</a></td><td><strong class="seat-number ${!unreliable&&count>0?'available':''}">${remaining}</strong>${unreliable&&!unknown?`<small>Last observed: ${count}</small>`:''}</td><td>${unknown?'—':`${o.actual} / ${o.capacity}`}${o.cross_list?`<details><summary>Shared limit</summary><small>${o.cross_list.remaining} remaining</small></details>`:''}</td><td><time>${seatTime(o.checked_at)}</time>${o.error?`<small class="seat-error">${esc(o.error)}</small>`:o.stale?'<small>Stale observation</small>':unknown?'<small>Awaiting first check</small>':''}</td></tr>`;
  }).join('');
- renderCombinations();
+
  $('seat-event-count').textContent=s.events.length||'';
- $('seat-events').innerHTML=[...s.events].reverse().slice(0,30).map(e=>`<div class="seat-event"><time>${seatTime(e.at)}</time><span>${e.kind==='opened'?`${esc(seatLabel(e.crn))} · ${e.remaining} seat(s) observed`:`Monitoring stopped · ${esc(e.crn)}`}</span>${e.kind==='opened'?`<button class="review-choice" data-choice="${esc(e.crn)}">Review section</button>`:''}</div>`).join('')||'<p>No alerts yet.</p>';
+ $('seat-events').innerHTML=[...s.events].reverse().slice(0,30).map(e=>`<div class="seat-event"><time>${seatTime(e.at)}</time><span>${e.kind==='opened'?`${esc(seatLabel(e.crn))} · ${e.remaining} seat(s) observed`:`Monitoring stopped · ${esc(e.crn)}`}</span>${e.kind==='opened'?`<a href="${courseURL(s.term,e.crn)}" target="_blank" rel="noreferrer">Course page ↗</a>`:''}</div>`).join('')||'<p>No alerts yet.</p>';
  if(s.reason){monitorMessage(s.reason,!s.reason.startsWith('Public feed is busy.'));displayedMonitorReason=s.reason;}
  else if(displayedMonitorReason){if($('monitor-message').textContent===displayedMonitorReason)monitorMessage('');displayedMonitorReason='';}
 }
@@ -73,9 +73,7 @@ async function pollSeats(){
  finally{setTimeout(pollSeats,2500);}
 }
 async function saveWatch(){
- const crns=[...new Set($('watch-crns').value.trim().split(/[\s,;]+/).filter(Boolean))];
- if(!crns.length&&!$('watch-follow').checked)throw Error('Add at least one CRN.');
- seatState=await api('seats/config',{term:plan.term,crns,interval:Number($('watch-interval').value),follow_plan:$('watch-follow').checked,backups:$('watch-backups').checked});renderSeats(true);
+ seatState=await api('seats/config',{term:plan.term,crns:[],interval:Number($('watch-interval').value),follow_plan:true,backups:false});renderSeats(true);
 }
 async function seatAction(action){
  if(seatBusy||!loaded)return;
@@ -84,14 +82,7 @@ async function seatAction(action){
  catch(e){monitorMessage(e.message,true);}
  finally{seatBusy=false;renderSeats();}
 }
-$('watch-crns').oninput=()=>{watchDirty=true;$('watch-follow').checked=false;};
-for(const id of ['watch-interval','watch-follow','watch-backups'])$(id).onchange=()=>{watchDirty=true;};
-$('watch-plan').onclick=()=>{
- if(!loaded||seatState?.running)return;
- const crns=[...new Set(plan.courses.filter(r=>r.selected&&r.status!=='registered').flatMap(r=>r.crns.split(/\s+/).filter(Boolean)))];
- $('watch-crns').value=crns.join(' ');$('watch-follow').checked=true;watchDirty=true;
- monitorMessage(crns.length?'Watch list updated. Save or Start to apply.':'No unregistered sections selected.',!crns.length);
-};
+$('watch-interval').onchange=()=>{watchDirty=true;};
 $('watch-save').onclick=()=>seatAction(saveWatch);
 $('monitor-start').onclick=()=>seatAction(async()=>{
  if(seatState?.running){seatState=await api('seats/stop',{});return;}
@@ -110,26 +101,7 @@ $('desktop-toggle').onclick=async()=>{
  if(!('Notification' in window)){monitorMessage('Desktop notifications unavailable in this browser.',true);return;}
  try{
   if(desktopEnabled){desktopEnabled=false;}else{desktopEnabled=(await Notification.requestPermission())==='granted';if(!desktopEnabled)monitorMessage('Allow notifications for this page in Chrome and macOS settings.',true);}
-  $('desktop-toggle').textContent=desktopEnabled?'Desktop on':'Desktop off';$('desktop-toggle').setAttribute('aria-pressed',String(desktopEnabled));
+  $('desktop-toggle').textContent=desktopEnabled?'Desktop notifications on':'Desktop notifications off';$('desktop-toggle').setAttribute('aria-pressed',String(desktopEnabled));
  }catch{monitorMessage('Notification permission could not be requested.',true);}
-};
-let choiceReview=null,choiceSequence=0;
-function renderCombinations(){
- const names={available:'Selected components have seats',full:'A component is full',unknown:'Waiting for fresh counts',registered:'Registered'};
- $('combination-list').innerHTML=(seatState.combinations||[]).map(g=>`<article class="combination"><strong>${esc(g.course)}</strong><span class="combination-state ${esc(g.state)}">${names[g.state]}</span><div>${g.components.map(c=>`<span class="component-chip ${esc(c.state)}">${esc(c.course)} ${esc(c.section)} · ${esc(c.state)}</span>`).join('')}</div><small>Counts observed separately. Official component requirements and eligibility remain unverified.</small></article>`).join('');
- $('opportunity-list').innerHTML=(seatState.opportunities||[]).map(c=>`<article class="opportunity"><span><strong>${esc(c.course)} ${esc(c.section)}</strong> · seats observed · fits timetable</span><button data-choice="${esc(c.to)}">Review replacement</button></article>`).join('');
-}
-async function reviewChoice(crn){
- if(busy||!loaded)return;const seq=++choiceSequence;choiceReview=null;$('choice-apply').disabled=true;$('choice-error').textContent='';$('choice-summary').textContent='Checking…';if(!$('choice-dialog').open)$('choice-dialog').showModal();
- try{const c=await api('choice/review',{crn,revision:plan.revision});if(seq!==choiceSequence)return;choiceReview=c;$('choice-summary').innerHTML=`<p><strong>${esc(c.course)} ${esc(c.section)}</strong></p><p>${c.from?`Replace ${esc(c.from)} → ${esc(c.to)}`:`Select ${esc(c.to)}`}</p><p>Prepared CRNs: <code>${esc(c.crns.join(' '))}</code></p><details><summary>Eligibility checks</summary>${c.warnings.map(w=>`<p>${esc(w)}</p>`).join('')}</details>`;$('choice-apply').disabled=false;}
- catch(e){if(seq!==choiceSequence)return;$('choice-summary').textContent='Section cannot be selected yet.';$('choice-error').textContent=e.message;}
-}
-for(const id of ['opportunity-list','seat-events'])$(id).onclick=e=>{const b=e.target.closest('[data-choice]');if(b)reviewChoice(b.dataset.choice);};
-$('choice-close').onclick=()=>{choiceSequence++;choiceReview=null;$('choice-dialog').close();};
-$('choice-apply').onclick=async()=>{
- if(!choiceReview||busy)return;busy=true;$('choice-apply').disabled=true;
- try{plan=await api('choice/apply',{crn:choiceReview.to,revision:choiceReview.revision});invalidate();render();saveLabel('Saved');$('choice-dialog').close();view('plan');notify('Section selected. CRNs updated.');}
- catch(e){$('choice-error').textContent=e.message;}
- finally{busy=false;schedulePrepare();$('choice-apply').disabled=false;}
 };
 pollSeats();

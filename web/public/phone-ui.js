@@ -5,8 +5,8 @@ function renderPhone(s){
  $('phone-pairing').hidden=!s.pair_code;$('phone-command').textContent=s.pair_code?'/start '+s.pair_code:'';
  $('phone-enabled').checked=s.enabled;$('phone-details').checked=s.details;
  $('phone-enabled').disabled=$('phone-details').disabled=$('phone-test').disabled=!s.paired||phoneBusy;
- $('phone-status').textContent=s.last||'Phone delivery is off.';
- $('phone-open').textContent=s.enabled?'Phone on':'Phone';
+ $('phone-status').textContent=s.last||'Telegram notifications are off.';
+ $('phone-open').textContent=s.enabled?'Telegram notifications on':'Telegram notifications off';
 }
 async function phoneAction(path,payload={}){
  if(phoneBusy)return;phoneBusy=true;let failure='';

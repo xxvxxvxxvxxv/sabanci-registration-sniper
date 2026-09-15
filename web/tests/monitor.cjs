@@ -6,7 +6,7 @@ module.exports=async function testMonitor(){
  let now=Date.parse('2026-09-14T00:00:00Z'),tick,pending=true,count=80,failTelegram=false;
  const requested=[],messages=[],cat=JSON.parse(fs.readFileSync('public/data/catalog.json'));
  w.Date.now=()=>now;w.setInterval=f=>{tick=f;};w.AbortSignal.timeout=()=>undefined;
- w.navigator.locks={request:async(name,options,cb)=>cb({name})};
+ w.navigator.locks={request:async(name,options,cb)=>(cb||options)({name})};
  // Synthetic credentials only; all HTTP calls are intercepted below.
  w.sessionStorage.setItem('sniper-web-telegram-v1',JSON.stringify({token:'123456:synthetic_test_token_only',chat:42,enabled:true,details:true}));
  w.fetch=async(url,options={})=>{
@@ -26,7 +26,8 @@ module.exports=async function testMonitor(){
   for(const f of ['core.js','web-api.js'])w.eval(fs.readFileSync('public/'+f,'utf8'));
   const api=w.SniperWeb.api;
   const ids=['13511','10350','10352','10355','12131','10218','10221','10690','10693'];
-  await api('seats/config',{term:'202601',crns:ids,interval:120,follow_plan:false,backups:false});
+  let plan=await api('plan');plan=await api('crns/import',{text:ids.join(' '),term:plan.term,revision:plan.revision});
+  await api('seats/config',{term:'202601',crns:[],interval:30,follow_plan:true,backups:false});
   await api('seats/start');
   for(let i=0;i<ids.length;i++){await tick();now+=10000;}
   assert.deepEqual(requested,ids,'Pending retries must not starve later CRNs, including HUM 207/D');
@@ -37,9 +38,10 @@ module.exports=async function testMonitor(){
   assert.equal(state.observations['10693'].available,80);
   assert.equal(messages.length,0,'Initial available observations establish a baseline, without alerts');
   await api('seats/stop');
-  await api('seats/config',{term:'202601',crns:['10690'],interval:120,follow_plan:false,backups:false});
+  plan=await api('plan');plan.courses.forEach(r=>r.selected=r.crns==='10690');await api('save',plan);
+  await api('seats/config',{term:'202601',crns:[],interval:30,follow_plan:true,backups:false});
   await api('seats/start');
-  const check=async n=>{count=n;now+=121000;await tick();await new Promise(r=>setImmediate(r));};
+  const check=async n=>{count=n;now+=31000;await tick();await new Promise(r=>setImmediate(r));};
   await check(0);assert.equal(messages.length,0);
   await check(1);assert.equal(messages.length,1);
   assert.equal(messages[0].chat_id,'42');assert.match(messages[0].text,/CRN 10690: 1 seat/);
