@@ -27,8 +27,10 @@ const html=fs.readFileSync('public/index.html','utf8'),cat=JSON.parse(fs.readFil
  const lessonHeight=parseFloat(scroll.style.getPropertyValue('--lesson-height'));
  assert(Math.abs(parseFloat(block.style.height)/lessonHeight-Math.round(parseFloat(block.style.height)/lessonHeight*10)/10)<0.001);
  const fitHeight=parseFloat(day.style.height);
- assert.equal(w.document.getElementById('timetable-scale'),null);
- w.localStorage.setItem('sniper-timetable-scale','comfortable');w.innerHeight=700;w.dispatchEvent(new w.Event('resize'));
+ const sizing=w.document.getElementById('timetable-scale');sizing.value='comfortable';sizing.onchange();
+ assert(parseFloat(w.document.querySelector('.tt-day').style.height)>fitHeight);
+ assert.equal(w.localStorage.getItem('sniper-timetable-scale'),'comfortable');
+ sizing.value='fit';sizing.onchange();w.innerHeight=700;w.dispatchEvent(new w.Event('resize'));
  assert(parseFloat(w.document.querySelector('.tt-day').style.height)<fitHeight);
  assert.equal(w.document.querySelectorAll('.tt-warning').length,2);
 

@@ -1,5 +1,8 @@
 'use strict';
 let catalogData=null, expandedCourse='';
+let timetableScale='fit';try{if(localStorage.getItem('sniper-timetable-scale')==='comfortable')timetableScale='comfortable';}catch{}
+$('timetable-scale').value=timetableScale;
+$('timetable-scale').onchange=()=>{timetableScale=$('timetable-scale').value;try{localStorage.setItem('sniper-timetable-scale',timetableScale);}catch{}renderTimetable();};
 window.addEventListener('resize',()=>{if(catalogData&&!$('view-catalog').hidden)renderTimetable();});
 const typeName=t=>({'':'Main section',R:'Recitation',L:'Lab',D:'Discussion'}[t]||'Component '+t);
 const hm=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
@@ -50,7 +53,7 @@ function renderTimetable(){
  const scroll=document.querySelector('.timetable-scroll'),top=scroll.getBoundingClientRect().top;
  const height=Math.max(280,window.innerHeight-(top>0?top:285)-24);
  scroll.style.height=height+'px';scroll.style.maxHeight=height+'px';
- const scale=(height-42)/(end-start);
+ const scale=timetableScale==='fit'?(height-42)/(end-start):1.4;
  scroll.classList.toggle('tt-compact',scale<1.1);scroll.style.setProperty('--hour-height',60*scale+'px');scroll.style.setProperty('--lesson-height',50*scale+'px');
  const grid=$('timetable');grid.replaceChildren();grid.style.gridTemplateColumns=`58px repeat(${dayCount},minmax(100px,1fr))`;
  const corner=document.createElement('div');corner.className='tt-head';grid.append(corner);
@@ -63,14 +66,13 @@ function renderTimetable(){
   // Allocate separate lanes in each connected overlap group so neither class is hidden.
   let group=[],until=-1;const clusters=[];for(const s of meetings){if(group.length&&s.start>=until){clusters.push(group);group=[];until=-1;}group.push(s);until=Math.max(until,s.end);}if(group.length)clusters.push(group);
   for(const cluster of clusters){const lanes=[];for(const s of cluster){let lane=lanes.findIndex(e=>e<=s.start);if(lane<0)lane=lanes.length;lanes[lane]=s.end;s.lane=lane;}
-   for(const s of cluster){const conflict=conflictSlots.has(s),block=document.createElement('a');block.className='tt-block '+(conflict?'tt-conflict':'');const [bg,accent]=colors.get(colorKey(s.row));block.style.setProperty('--course-bg',bg);block.style.setProperty('--course-accent',accent);block.dataset.course=colorKey(s.row);block.style.top=(s.start-start)*scale+'px';block.style.height=(s.end-s.start)*scale+'px';block.style.width=`calc(${100/lanes.length}% - 4px)`;block.style.left=`calc(${s.lane*100/lanes.length}% + 2px)`;
+   for(const s of cluster){const conflict=conflictSlots.has(s),block=document.createElement('a');block.className='tt-block '+(conflict?'tt-conflict':'');const [bg,accent]=colors.get(colorKey(s.row));block.style.setProperty('--course-bg',bg);block.style.setProperty('--course-accent',accent);block.dataset.course=colorKey(s.row);block.style.top=(s.start-start)*scale+'px';block.style.height=(s.end-s.start)*scale+'px';block.classList.toggle('tt-tight',(s.end-s.start)*scale<35);block.classList.toggle('tt-tiny',(s.end-s.start)*scale<25);block.style.width=`calc(${100/lanes.length}% - 4px)`;block.style.left=`calc(${s.lane*100/lanes.length}% + 2px)`;
     const registration=window.registrationInfo?window.registrationInfo(s.row):null;
     const offering=catalogData.courses.flatMap(c=>c.offerings).find(o=>o.crn===s.row.crns);const place=offering?.meetings.find(m=>m.day===s.day&&m.start===s.start)?.place||'';
     block.innerHTML=`<b class="tt-block-title">${conflict?conflictIcon:''}<span>${esc(s.row.course)}</span></b>${window.registrationBadge?window.registrationBadge(s.row):''}<span>${esc(s.row.section)} · ${esc(s.row.crns)} ↗</span><small><span class="tt-time">${hm(s.start)}–${hm(s.end)}</span><span class="tt-room">${esc(place)}</span></small>`;block.title=`${conflict?'Time conflict · ':''}${dayNames[s.day]} · ${s.row.course} ${s.row.section}\n${s.row.crns}\n${hm(s.start)}–${hm(s.end)} ${place}${registration?'\n'+registration.detail:''}`;block.setAttribute('aria-label',block.title);block.href=courseURL(plan.term,s.row.crns.split(/\s+/)[0]);block.target='_blank';block.rel='noreferrer';col.append(block);
    }
   }grid.append(col);
  }
- $('timetable-details').innerHTML=active.map(r=>{const found=SniperCore.lookup(catalogData,r.crns),o=found?.o;return `<article class="timetable-detail"><a href="${courseURL(plan.term,r.crns.split(/\s+/)[0])}" target="_blank" rel="noreferrer"><b>${esc(r.course)} · ${esc(r.section)}</b><span>CRN ${esc(r.crns)} ↗</span></a>${window.registrationBadge?window.registrationBadge(r):''}<p>${esc(found?.c.name||'')}</p><p>${esc(o?.instructor||r.notes||'')}</p><p>${esc(o?offerText(o):r.meetings).replaceAll('\n','<br>')}</p></article>`;}).join('');
  const issues=[...new Set(clashes.map(p=>p.map(s=>s.row.course+' '+s.row.section).join(' / ')+': '+dayNames[p[0].day]+' '+hm(Math.max(p[0].start,p[1].start))+'–'+hm(Math.min(p[0].end,p[1].end))))];
  const cm=new Map(catalogData.courses.map(c=>[c.code,c]));for(const base of new Set(active.map(r=>r.catalog_base).filter(Boolean))){const c=cm.get(base);if(!c)continue;const missing=[...new Set(c.offerings.map(o=>o.type))].filter(t=>!active.some(r=>r.catalog_base===base&&r.catalog_type===t));if(missing.length)issues.push(base+': also offers '+missing.map(typeName).join(', ')+'. Check which components you need.');}
  for(const r of active){const o=cm.get(r.catalog_base)?.offerings.find(o=>o.crn===r.crns);if(!r.meetings||o?.unknown_times)issues.push(r.course+': TBA or incomplete meeting times.');}
